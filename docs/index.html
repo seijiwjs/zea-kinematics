@@ -77,14 +77,17 @@
           // Examine the text in the response
           response.json().then(function(data) {
 
-            const search = [
+            const search = {
+              paths: [
                 '/',
                 '/guide',
                 '/get-started',
                 '/tutorials/',
                 '/tutorials/gears-operator',
                 ...data.searchToc
-              ]
+              ],
+              depth: 6,
+            }
 
             window.$docsify = {
               name:'Zea Kinematics Docs',
