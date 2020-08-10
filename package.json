@@ -1,0 +1,54 @@
+{
+  "name": "@zeainc/zea-kinematics",
+  "libraryName": "ZeaKinematics",
+  "fileName": "zea-kinematics",
+  "author": "Philip Taylor",
+  "description": "kinematics Extension for Zea Engine.",
+  "version": "1.1.2",
+  "license": "MIT",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "rawimport": "dist/index.rawimport.js",
+  "files": [
+    "/dist/index.cjs.js",
+    "/dist/index.esm.js",
+    "/dist/index.rawimport.js"
+  ],
+  "keywords": [
+    "WebGL",
+    "es6",
+    "Zea"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:ZeaInc/zea-kinematics.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c rollup.config.dev.js -w",
+    "dist": "yarn publish --access=public",
+    "docs": "adg",
+    "prepare": "yarn build",
+    "start": "rollup -c rollup.config.dev.js -w"
+  },
+  "devDependencies": {
+    "@zeainc/jsdocs2md": "^1.0.0-rc.5",
+    "eslint": "^6.5.1",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.18.2",
+    "rollup": "^2.2.0",
+    "rollup-plugin-terser": "^5.3.0",
+    "rollup-plugin-web-worker-loader": "^0.9.0",
+    "worker-loader": "^2.0.0",
+    "yargs": "12.0.2"
+  },
+  "dependencies": {
+    "@zeainc/zea-engine": "^1.0.4",
+    "docsify": "^4.11.3"
+  },
+  "externals": {
+    "@zeainc/zea-engine": "@zeainc/zea-engine"
+  }
+}
