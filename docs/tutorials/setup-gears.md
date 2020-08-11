@@ -52,61 +52,60 @@ And that's it! Not that complicated, eh?
 !>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea CAD](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation, you can use the CDNs (as we do in the example code).
 
 ```javascript
-import { Vec3, Xfo, Color, Material, GeomItem, Cylinder, GearsOperator, Scene, GLRenderer } from 'https://cdn.jsdelivr.net/npm/@zeainc/zea-engine/dist/index.esm.js'
-import { CADAsset } from 'https://cdn.jsdelivr.net/npm/@zeainc/zea-cad/dist/index.rawimport.js'
+  import { Vec3, Xfo, Color, Material, TreeItem, GeomItem, Cylinder, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { GearsOperator } from '../libs/zea-kinematics/dist/index.rawimport.js'
 
-const domElement = document.getElementById("viewport")
+  const domElement = document.getElementById("viewport")
 
-const scene = new Scene()
-scene.setupGrid(10.0, 10)
+  const scene = new Scene()
+  scene.setupGrid(10.0, 10)
 
-const asset = new CADAsset("gears")
-scene.getRoot().addChild(asset)
+  const treeItem = new TreeItem("tree")
+  scene.getRoot().addChild(treeItem)
 
-const gearsOp = new GearsOperator("Gears")
-asset.addChild(gearsOp)
+  const gearsOp = new GearsOperator("Gears")
+  treeItem.addChild(gearsOp)
 
-let index = 0
-let sign = 1
-let prevTeeth = 0
-let prevRatio = 1.0
-const addGear = (pos, radius, teeth, axis, color) => {
-  const gearGeom = new Cylinder(radius, 0.2, teeth)
-  const gearMaterial = new Material('gearmaterial', 'SimpleSurfaceShader')
-  gearMaterial.getParameter('BaseColor').setValue(color)
-  const geomItem = new GeomItem('gear' + index++, gearGeom, gearMaterial)
-  const xfo = new Xfo()
-  xfo.tr = pos
-  geomItem.setLocalXfo(xfo)
-  asset.addChild(geomItem)
+  let index = 0
+  let sign = 1
+  let prevTeeth = 0
+  let prevRatio = 1.0
+  const addGear = (pos, radius, teeth, axis, color) => {
+    const gearGeom = new Cylinder(radius, 0.2, teeth)
+    const gearMaterial = new Material('gearmaterial', 'SimpleSurfaceShader')
+    gearMaterial.getParameter('BaseColor').setValue(color)
+    const geomItem = new GeomItem('gear' + index++, gearGeom, gearMaterial)
+    const xfo = new Xfo()
+    xfo.tr = pos
+    geomItem.getParameter('LocalXfo').setValue(xfo)
+    treeItem.addChild(geomItem)
 
-  const ratio = (prevTeeth > 0 ? prevTeeth / teeth : 1.0) * sign
-  console.log(index, ratio)
-  prevTeeth = teeth
-  prevRatio = ratio
-  sign = -sign
+    const ratio = (prevTeeth > 0 ? prevTeeth / teeth : 1.0) * sign
+    console.log(index, ratio)
+    prevTeeth = teeth
+    prevRatio = ratio
+    sign = -sign
 
-  const gear = gearsOp.getParameter('Gears').addElement()
-  gear.getMember('Ratio').setValue(ratio)
-  gear.getMember('Axis').setValue(axis)
-  gear.getOutput().setParam(geomItem.getParameter('GlobalXfo'))
-}
-addGear(new Vec3(0, 0, 0), 2.5, 12, new Vec3(0, 0, 1), new Color(1.0, 0.0, 0.0))
-addGear(new Vec3(3.5, 0, 0), 1.2, 8, new Vec3(0, 0, 1), new Color(0.0, 0.0, 1.0))
-addGear(new Vec3(3.5, 1.6, 0), 0.6, 5, new Vec3(0, 0, 1), new Color(1.0, 1.0, 0.0))
+    const gear = gearsOp.getParameter('Gears').addElement()
+    gear.getMember('Ratio').setValue(ratio)
+    gear.getMember('Axis').setValue(axis)
+    gear.getOutput().setParam(geomItem.getParameter('GlobalXfo'))
+  }
+  addGear(new Vec3(0, 0, 0), 2.5, 12, new Vec3(0, 0, 1), new Color(1.0, 0.0, 0.0))
+  addGear(new Vec3(3.5, 0, 0), 1.2, 8, new Vec3(0, 0, 1), new Color(0.0, 0.0, 1.0))
+  addGear(new Vec3(3.5, 1.6, 0), 0.6, 5, new Vec3(0, 0, 1), new Color(1.0, 1.0, 0.0))
 
-const rpmParam = gearsOp.getParameter('RPM')
-rpmParam.setValue(12.0)
-rpmParam.setRange([0, 60])
+  const rpmParam = gearsOp.getParameter('RPM')
+  rpmParam.setValue(12.0)
+  rpmParam.setRange([0, 60])
 
-const renderer = new GLRenderer(domElement)
-renderer.setScene(scene)
-renderer
-  .getViewport()
-  .getCamera()
-  .setPositionAndTarget(new Vec3(15, 15, 10), new Vec3(0, 0, 0))
-renderer.frameAll()
-renderer.resumeDrawing()
+  const renderer = new GLRenderer(domElement)
+  renderer.setScene(scene)
+  renderer
+    .getViewport()
+    .getCamera()
+    .setPositionAndTarget(new Vec3(15, 15, 10), new Vec3(0, 0, 0))
+  renderer.frameAll()
 ```
 ___
 ## API Class References
