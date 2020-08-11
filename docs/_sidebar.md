@@ -5,6 +5,7 @@
 
 
 - Plugins
+  * [Setting up the Aim Operator](tutorials/setup-aim.md)
   * [Setting up an Explode Operator](tutorials/setup-explode.md)
   * [Setting up the Gears Operator](tutorials/setup-gears.md)
 

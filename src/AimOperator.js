@@ -4,6 +4,7 @@ import {
   MultiChoiceParameter,
   XfoParameter,
   Operator,
+  OperatorInput,
   OperatorOutput,
   OperatorOutputMode,
   Registry
@@ -27,7 +28,8 @@ class AimOperator extends Operator {
 
     this.addParameter(new NumberParameter('Stretch', 0.0))
     this.addParameter(new NumberParameter('Initial Dist', 1.0))
-    this.addParameter(new XfoParameter('Target'))
+    // this.addParameter(new XfoParameter('Target'))
+    this.addInput(new OperatorInput('Target'))
     this.addOutput(new OperatorOutput('InputOutput', OperatorOutputMode.OP_READ_WRITE))
   }
 
@@ -35,11 +37,16 @@ class AimOperator extends Operator {
    * The resetStretchRefDist method.
    */
   resetStretchRefDist() {
-    const target = this.getParameter('Target').getValue()
+    const target = this.getInput('Target').getValue()
     const output = this.getOutputByIndex(0)
     const xfo = output.getValue()
     const dist = target.tr.subtract(xfo.tr).length()
     this.getParameter('Initial Dist').setValue(dist)
+  }
+
+  __parameterValueChanged(event) {
+    // super.__parameterValueChanged(event)
+    // this.setDirty()
   }
 
   /**
@@ -47,8 +54,8 @@ class AimOperator extends Operator {
    */
   evaluate() {
     const weight = this.getParameter('Weight').getValue()
-    const target = this.getParameter('Target').getValue()
     const axis = this.getParameter('Axis').getValue()
+    const target = this.getInput('Target').getValue()
     const output = this.getOutputByIndex(0)
     const xfo = output.getValue()
     const dir = target.tr.subtract(xfo.tr)
@@ -76,14 +83,11 @@ class AimOperator extends Operator {
         vec = xfo.ori.getZaxis().negate()
         break
     }
-
     let align = new Quat()
     align.setFrom2Vectors(vec, dir)
     align.alignWith(new Quat())
     if (weight < 1.0) align = new Quat().lerp(align, weight)
-
     xfo.ori = align.multiply(xfo.ori)
-
     const stretch = this.getParameter('Stretch').getValue()
     if (stretch > 0.0) {
       const initialDist = this.getParameter('Initial Dist').getValue()
@@ -110,7 +114,7 @@ class AimOperator extends Operator {
       }
       // console.log("AimOperator.evaluate:", xfo.sc.toString())
     }
-    output.setCleanFromOp(xfo, this)
+    output.setClean(xfo)
   }
 }
 

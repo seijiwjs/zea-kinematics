@@ -27,7 +27,6 @@ class GearParameter extends StructParameter {
     this.__ratioParam = this._addMember(new NumberParameter('Ratio', 1.0))
     this.__offsetParam = this._addMember(new NumberParameter('Offset', 0.0))
     this.__axisParam = this._addMember(new Vec3Parameter('Axis', new Vec3(1, 0, 0)))
-    this.__output = new OperatorOutput('Gear', OperatorOutputMode.OP_READ_WRITE)
   }
 
   /**
@@ -126,6 +125,7 @@ class GearsOperator extends Operator {
     })
     this.__gearsParam = this.addParameter(new ListParameter('Gears', GearParameter))
     this.__gearsParam.on('elementAdded', event => {
+      event.elem.__output = new OperatorOutput('Gear' + event.index, OperatorOutputMode.OP_READ_WRITE)
       this.addOutput(event.elem.getOutput())
     })
     this.__gearsParam.on('elementRemoved', event => {
@@ -142,8 +142,8 @@ class GearsOperator extends Operator {
     // console.log(`Operator: evaluate: ${this.getName()}`)
     const revolutions = this.__revolutionsParam.getValue()
     const gears = this.__gearsParam.getValue()
-    for (const gear of gears) {
-      const output = gear.getOutput()
+    gears.forEach((gear, index) => {
+      const output = this.getOutputByIndex(index)
 
       // Note: we have cases where we have interdependencies.
       // Operator A Writes to [A, B, C]
@@ -153,7 +153,7 @@ class GearsOperator extends Operator {
       // Now operator B is evaluating will partially setup.
       // See SmartLoc: Exploded Parts and Gears read/write the same set of
       // params.
-      if (!output.isConnected()) continue
+      if (!output.isConnected()) return
 
       const rot = revolutions * gear.getRatio() + gear.getOffset()
 
@@ -162,7 +162,7 @@ class GearsOperator extends Operator {
       const xfo = output.getValue()
       xfo.ori = quat.multiply(xfo.ori)
       output.setClean(xfo)
-    }
+    })
   }
 
   /**
