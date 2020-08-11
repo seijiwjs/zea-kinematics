@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZEA CAD - Setup CCDIK</title>
+  <style type="text/css">
+    html, body {
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport"></div>
+</body>
+<script type="module">
+  import { Vec3, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Cone, Sphere, Cuboid, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { CCDIKSolver } from '../libs/zea-kinematics/dist/index.rawimport.js'
+
+  const domElement = document.getElementById("viewport")
+
+  const scene = new Scene()
+  const renderer = new GLRenderer(domElement)
+  renderer.setScene(scene)
+  renderer
+    .getViewport()
+    .getCamera()
+    .setPositionAndTarget(new Vec3(3, 3, 1), new Vec3(0, 0, 0))
+
+  scene.setupGrid(10.0, 10)
+
+  const treeItem = new TreeItem("tree")
+  scene.getRoot().addChild(treeItem)
+
+  const chainMaterial = new Material('chainMaterial', 'SimpleSurfaceShader')
+  chainMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
+
+  /////////////////////////////////////////
+  // Setup the base
+  // const baseGeom = new Cylinder(0.2, 0.2, 40, 2, true, true)
+  const baseGeom = new Cuboid(0.2, 0.2, 0.2, true)
+  const base = new GeomItem('base', baseGeom, chainMaterial)
+  treeItem.addChild(base)
+  
+  /////////////////////////////////////////
+  // Setup Joint 0
+  const joint0Geom = new Cuboid(0.1, 0.1, 0.78, true)
+
+  const joint0 = new GeomItem('joint0', joint0Geom, chainMaterial)
+  const joint0xfo = new Xfo()
+  joint0xfo.tr.set(0, 0, 0.21)
+  joint0.getParameter('LocalXfo').setValue(joint0xfo)
+  treeItem.addChild(joint0)
+  
+  /////////////////////////////////////////
+  // Setup Joint 1
+  const joint1Geom = new Cuboid(0.06, 0.06, 0.1, true)
+
+  const joint1 = new GeomItem('joint1', joint1Geom, chainMaterial)
+  const joint1xfo = new Xfo()
+  joint1xfo.tr.set(0, 0, 1.0)
+  // joint1xfo.sc.set(.1, .1, .1)
+  joint1.getParameter('LocalXfo').setValue(joint1xfo)
+  treeItem.addChild(joint1)
+
+  /////////////////////////////////////////
+  // Setup the Target
+  const targGeom = new Cuboid(0.04, 0.04, 0.04)
+  const targGeomMaterial = new Material('targGeommaterial', 'SimpleSurfaceShader')
+  targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  const targGeomItem = new GeomItem('target', targGeom, targGeomMaterial)
+  const targXfo = new Xfo()
+  targXfo.tr.set(-1, 1, 1)
+  targXfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * -0.5)
+  targGeomItem.getParameter('LocalXfo').setValue(targXfo)
+  treeItem.addChild(targGeomItem)
+
+  /////////////////////////////////////////
+  // Setup the Solver
+  const ikSolver = new CCDIKSolver("ikSolver")
+  ikSolver.getInput('Target').setParam(targGeomItem.getParameter('GlobalXfo'))
+  ikSolver.addJoint(base.getParameter('GlobalXfo'), 2)
+  ikSolver.addJoint(joint0.getParameter('GlobalXfo'), 0)
+  ikSolver.addJoint(joint1.getParameter('GlobalXfo'), 0)
+  treeItem.addChild(ikSolver)
+
+  // //////////////////////////////////////////////
+  // Make the target draggable.
+  targGeomItem.on('mouseEnter', (event) => {
+    targGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
+  })
+  targGeomItem.on('mouseLeave', (event) => {
+    targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  })
+
+  let draggedGeom
+  const geomRay = new Ray()
+  const mouseMove = (event) => {
+    event.stopPropagation()
+    
+    const xfo = draggedGeom.getParameter('GlobalXfo').getValue()
+    const dist = event.mouseRay.intersectRayPlane(geomRay)
+    xfo.tr = event.mouseRay.pointAtDist(dist)
+    draggedGeom.getParameter('GlobalXfo').setValue(xfo)
+  }
+  const mouseUp = (event) => {
+    event.stopPropagation()
+
+    renderer.getViewport().off('mouseMove', mouseMove)
+    renderer.getViewport().off('mouseUp', mouseUp)
+  }
+  renderer.getViewport().on('mouseDownOnGeom', (event) => {
+    event.stopPropagation()
+
+    draggedGeom = event.intersectionData.geomItem
+    
+    // geomRay.dir = event.viewport.getCamera().getParameter('GlobalXfo').getValue().ori.getZaxis().negate()
+    geomRay.dir = event.mouseRay.dir.negate()
+    geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
+
+    renderer.getViewport().on('mouseMove', mouseMove)
+    renderer.getViewport().on('mouseUp', mouseUp)
+  })
+ 
+</script>
+</html>
