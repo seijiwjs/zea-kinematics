@@ -21,20 +21,25 @@ const identityXfo = new Xfo()
 class CCDIKJoint {
   constructor(globalXfoParam, axisId = 0) {
     this.axisId = axisId
-    this.limits = [0, 0]
+    this.limits = [-Math.PI, Math.PI]
     this.align = new Quat()
     // this.output = new OperatorOutput('Joint')
     // this.output.setParam(globalXfoParam)
   }
 
-  init(output, parentXfo) {
+  init(output, globalXfoParam, parentXfo) {
     this.output = output
+    this.output.setParam(globalXfoParam)
     this.xfo = this.output.getValue().clone() // until we have an IO output
-    this.localXfo = parentXfo.inverse().multiply(this.xfo)
+    this.bindLocalXfo = parentXfo.inverse().multiply(this.xfo)
+    this.localXfo = this.bindLocalXfo.clone()
   }
 
-  preEval() {
-    this.xfo = this.output.getValue().clone() // until we have an IO output
+  preEval(parentXfo) {
+    // this.xfo = this.output.getValue().clone() // until we have an IO output
+    this.xfo.ori = parentXfo.ori.multiply(this.bindLocalXfo.ori)
+    this.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(this.bindLocalXfo.tr))
+    // this.localXfo = parentXfo.inverse().multiply(this.xfo)
   }
 
   /**
@@ -43,6 +48,11 @@ class CCDIKJoint {
   evaluate(parentXfo, tipXfo, targetXfo, isTip) {
     if (isTip) {
       this.xfo.ori = targetXfo.ori
+
+      // const tipVec = this.xfo.ori.getZaxis()
+      // const targetVec = targetXfo.ori.getZaxis()
+      // this.align.setFrom2Vectors(tipVec, targetVec)
+      // this.xfo.ori = this.align.multiply(this.xfo.ori)
     } else {
       const tipVec = tipXfo.tr.subtract(this.xfo.tr)
       tipVec.normalizeInPlace()
@@ -62,47 +72,47 @@ class CCDIKJoint {
     switch (this.axisId) {
       case 0:
         axis = X_AXIS
-        // axis = this.xfo.ori.getXaxis()
         break
       case 1:
         axis = Y_AXIS
-        // axis = this.xfo.ori.getYaxis()
         break
       case 2:
         axis = Z_AXIS
-        // axis = this.xfo.ori.getZaxis()
         break
     }
 
-    this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), parentXfo.ori.rotateVec3(axis))
+    const globalAxis = parentXfo.ori.rotateVec3(axis)
+
+    this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), globalAxis)
     this.xfo.ori = this.align.multiply(this.xfo.ori)
 
-    // ///////////////////////
-    // // Apply Hinge angle Limits.
+    this.align.setFrom2Vectors(this.localXfo.ori.rotateVec3(axis), axis)
+    this.localXfo.ori = this.align.multiply(this.localXfo.ori)
 
-    // const currAngle = Math.acos(this.xfo.ori.dot(parentXfo.ori))
-    // if (currAngle < this.limits[0] || currAngle > this.limits[1]) {
-    //   const newAngle = MathFunctions.clamp(currAngle, this.limits[0], this.limits[1])
-    //   switch (this.axisId) {
-    //     case 0:
-    //       this.align.setFromAxisAndAngle(X_AXIS, newAngle)
-    //       break
-    //     case 1:
-    //       this.align.setFromAxisAndAngle(Y_AXIS, newAngle)
-    //       break
-    //     case 2:
-    //       this.align.setFromAxisAndAngle(Z_AXIS, newAngle)
-    //       break
-    //   }
-    //   this.xfo.ori = parentXfo.ori.multiply(this.align)
-    // }
+    ///////////////////////
+    // Apply angle Limits.
+
+    const currAngle = Math.acos(this.xfo.ori.dot(parentXfo.ori))
+    if (currAngle < this.limits[0] || currAngle > this.limits[1]) {
+      const deltaAngle = currAngle < this.limits[0] ? this.limits[0] - currAngle : currAngle - this.limits[1]
+      this.align.setFromAxisAndAngle(globalAxis, deltaAngle)
+      this.xfo.ori = this.align.multiply(this.xfo.ori)
+    }
+
+    this.localXfo.ori = parentXfo.ori.inverse().multiply(this.xfo.ori)
+    this.localXfo.ori.normalizeInPlace()
   }
 
   forwardPropagate(parentXfo, targetXfo, isTip) {
-    if (isTip) {
-      this.xfo.ori = targetXfo.ori
-    }
-    this.xfo.tr = parentXfo.ori.rotateVec3(this.localXfo.tr)
+    // if (isTip) {
+    //   this.xfo.ori = targetXfo.ori
+    // }
+    // this.xfo.tr = parentXfo.ori.rotateVec3(this.localXfo.tr)
+
+    // this.xfo = parentXfo.multiply(this.localXfo)
+
+    this.xfo.ori = parentXfo.ori.multiply(this.localXfo.ori)
+    this.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(this.localXfo.tr))
   }
 
   postEval() {
@@ -135,6 +145,7 @@ class CCDIKSolver extends Operator {
     this.addInput(new OperatorInput('Root'))
     this.addInput(new OperatorInput('Target'))
     this.__joints = []
+    this.enabled = false
   }
 
   addJoint(globalXfoParam, axisId = 0) {
@@ -144,31 +155,44 @@ class CCDIKSolver extends Operator {
     const joint = new CCDIKJoint(globalXfoParam, axisId)
 
     const output = this.addOutput(new OperatorOutput('Joint' + this.__joints.length))
-    output.setParam(globalXfoParam)
 
     if (this.__joints.length > 0) {
       const prevJoint = this.__joints[this.__joints.length - 1]
-      joint.init(output, prevJoint.xfo)
+      joint.init(output, globalXfoParam, prevJoint.xfo)
     } else {
-      joint.init(output, rootXfo)
+      joint.init(output, globalXfoParam, rootXfo)
     }
 
     this.__joints.push(joint)
     return joint
   }
 
+  enable() {
+    this.enabled = true
+    this.setDirty()
+  }
+
   /**
    * The evaluate method.
    */
   evaluate() {
+    if (!this.enabled) {
+      this.__joints.forEach(joints => joints.postEval())
+      return
+    }
     const rootXfo = this.getInput('Root').isConnected() ? this.getInput('Root').getValue() : identityXfo
     const targetXfo = this.getInput('Target').getValue()
-    const iterations = this.getParameter('Iterations').getValue()
+    const iterations = 20 //this.getParameter('Iterations').getValue()
     const numJoints = this.__joints.length
     const tipJoint = this.__joints[numJoints - 1]
 
+    for (let i = 0; i < numJoints; i++) {
+      const parentXfo = i > 0 ? this.__joints[i - 1].xfo : rootXfo
+      this.__joints[i].preEval(parentXfo)
+    }
+
     for (let i = 0; i < iterations; i++) {
-      for (let j = numJoints - 1; j >= 0; j--) {
+      for (let j = numJoints - 1; j >= numJoints - 4; j--) {
         const joint = this.__joints[j]
         const parentXfo = j > 0 ? this.__joints[j - 1].xfo : rootXfo
         joint.evaluate(parentXfo, tipJoint.xfo, targetXfo, j > 0 && j == numJoints - 1)

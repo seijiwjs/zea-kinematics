@@ -42,53 +42,54 @@
   /////////////////////////////////////////
   // Setup the base
   // const baseGeom = new Cylinder(0.2, 0.2, 40, 2, true, true)
-  const baseGeom = new Cuboid(0.2, 0.2, 0.2, true)
+  const baseGeom = new Cuboid(0.3, 0.1, 0.2, true)
   const base = new GeomItem('base', baseGeom, chainMaterial)
+  base.length = 0.2
   treeItem.addChild(base)
   
   /////////////////////////////////////////
-  // Setup Joint 0
-  const joint0Geom = new Cuboid(0.1, 0.1, 0.78, true)
-
-  const joint0 = new GeomItem('joint0', joint0Geom, chainMaterial)
-  const joint0xfo = new Xfo()
-  joint0xfo.tr.set(0, 0, 0.21)
-  joint0.getParameter('LocalXfo').setValue(joint0xfo)
-  treeItem.addChild(joint0)
-  
-  /////////////////////////////////////////
-  // Setup Joint 1
-  const joint1Geom = new Cuboid(0.06, 0.06, 0.1, true)
-
-  const joint1 = new GeomItem('joint1', joint1Geom, chainMaterial)
-  const joint1xfo = new Xfo()
-  joint1xfo.tr.set(0, 0, 1.0)
-  // joint1xfo.sc.set(.1, .1, .1)
-  joint1.getParameter('LocalXfo').setValue(joint1xfo)
-  treeItem.addChild(joint1)
-
-  /////////////////////////////////////////
   // Setup the Target
-  const targGeom = new Cuboid(0.04, 0.04, 0.04)
+  const targGeom = new Cuboid(0.06, 0.06, 0.04)
   const targGeomMaterial = new Material('targGeommaterial', 'SimpleSurfaceShader')
   targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
   const targGeomItem = new GeomItem('target', targGeom, targGeomMaterial)
   const targXfo = new Xfo()
-  targXfo.tr.set(-1, 1, 1)
-  targXfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * -0.5)
+  // targXfo.tr.set(-0.4, .5, .5)
+  targXfo.tr.set(-0.5, .0, .5)
+  targXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
   targGeomItem.getParameter('LocalXfo').setValue(targXfo)
   treeItem.addChild(targGeomItem)
 
-  /////////////////////////////////////////
+  // ///////////////////////////////////////
   // Setup the Solver
   const ikSolver = new CCDIKSolver("ikSolver")
   ikSolver.getInput('Target').setParam(targGeomItem.getParameter('GlobalXfo'))
   ikSolver.addJoint(base.getParameter('GlobalXfo'), 2)
-  ikSolver.addJoint(joint0.getParameter('GlobalXfo'), 0)
-  ikSolver.addJoint(joint1.getParameter('GlobalXfo'), 0)
   treeItem.addChild(ikSolver)
 
-  // //////////////////////////////////////////////
+  // ///////////////////////////////////////
+  // Setup Joint 0
+
+  function addJoint(name, prevJoint, length, width, height, axis) {
+    const jointGeom = new Cuboid(width, height, length, true)
+    const joint = new GeomItem(name, jointGeom, chainMaterial)
+    const joint1xfo = new Xfo()
+    joint1xfo.tr.set(0, 0, prevJoint.length)
+    joint.length = length
+    joint.getParameter('LocalXfo').setValue(joint1xfo)
+    prevJoint.addChild(joint, false)
+    
+    ikSolver.addJoint(joint.getParameter('GlobalXfo'), axis)
+    return joint
+  }
+  const joint0 = addJoint('joint0', base, 0.6, 0.1, 0.05, 1)
+  const joint1 = addJoint('joint1', joint0, 0.1, 0.08, 0.03, 1)
+  const joint2 = addJoint('joint2', joint1, 0.4, 0.06, 0.03, 2)
+  const joint3 = addJoint('joint3', joint2, 0.08, 0.04, 0.03, 1)
+  const tip = addJoint('tip', joint3, 0.05, 0.03, 0.03, 2)
+  ikSolver.enable()
+
+  // ///////////////////////////////////////
   // Make the target draggable.
   targGeomItem.on('mouseEnter', (event) => {
     targGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
