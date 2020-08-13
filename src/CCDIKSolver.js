@@ -57,20 +57,35 @@ class IKJoint {
     // this.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(this.bindLocalXfo.tr))
   }
 
-  evalBackwards(childJoint, isTip, targetXfo, rootXfo, vecBaseToJoint) {
+  evalBackwards(parentJoint, childJoint, isTip, targetXfo, rootXfo, vecBaseToJoint) {
     if (isTip) {
       this.xfo = targetXfo.clone()
     } else {
       const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-
       const targetVec = childJoint.xfo.tr.subtract(rootXfo.tr)
-      this.align.setFrom2Vectors(vecBaseToJoint, targetVec)
-      this.xfo.ori = this.align.multiply(this.xfo.ori)
 
+      if (childJoint.axisId == -2) {
+        // This twist joint can rotate to facilitate its parent rotation
+        if (targetVec.normalize().angleTo(jointVec.normalize()) > 0.0001) {
+          const alignAxis = targetVec.cross(jointVec).normalize()
+          const jointAxis = this.xfo.ori.rotateVec3(this.axis)
+          if (alignAxis.dot(jointAxis) < 0.0) {
+            this.align.setFrom2Vectors(jointAxis.negate(), alignAxis)
+          } else {
+            this.align.setFrom2Vectors(jointAxis, alignAxis)
+          }
+          this.align.alignWith(this.xfo.ori)
+          this.xfo.ori = this.align.multiply(this.xfo.ori)
+        }
+      } else {
+        this.align.setFrom2Vectors(vecBaseToJoint.normalize(), targetVec.normalize())
+        // this.align.alignWith(this.xfo.ori)
+        this.xfo.ori = this.align.multiply(this.xfo.ori)
+      }
       vecBaseToJoint.subtractInPlace(jointVec)
 
       ///////////////////////
-      // Apply Hinge constraint.
+      // Apply joint constraint.
       this.align.setFrom2Vectors(
         this.xfo.ori.rotateVec3(childJoint.axis),
         childJoint.xfo.ori.rotateVec3(childJoint.axis)
@@ -102,16 +117,30 @@ class IKJoint {
       this.xfo.ori = targetXfo.ori
     } else {
       const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-
       const targetVec = targetXfo.tr.subtract(this.xfo.tr)
-      this.align.setFrom2Vectors(vecBaseToJoint, targetVec)
-      this.xfo.ori = this.align.multiply(this.xfo.ori)
+
+      if (this.axisId == -2) {
+        if (targetVec.normalize().angleTo(jointVec.normalize()) > 0.0001) {
+          const alignAxis = targetVec.cross(jointVec).normalize()
+          const childAxis = this.xfo.ori.rotateVec3(childJoint.axis)
+          if (alignAxis.dot(childAxis) < 0.0) {
+            this.align.setFrom2Vectors(childAxis.negate(), alignAxis)
+          } else {
+            this.align.setFrom2Vectors(childAxis, alignAxis)
+          }
+          this.align.alignWith(this.xfo.ori)
+          this.xfo.ori = this.align.multiply(this.xfo.ori)
+        }
+      } else {
+        this.align.setFrom2Vectors(vecBaseToJoint.normalize(), targetVec.normalize())
+        this.xfo.ori = this.align.multiply(this.xfo.ori)
+      }
 
       vecBaseToJoint.subtractInPlace(jointVec)
     }
 
     ///////////////////////
-    // Apply Hinge constraint.
+    // Apply joint constraint.
     if (isBase) {
       this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(this.axis), rootXfo.ori.rotateVec3(this.axis))
     } else {
@@ -187,7 +216,7 @@ class IKSolver extends Operator {
     }
     const rootXfo = this.getInput('Root').isConnected() ? this.getInput('Root').getValue() : identityXfo
     const targetXfo = this.getInput('Target').getValue()
-    const iterations = 10 //this.getParameter('Iterations').getValue()
+    const iterations = 2 //this.getParameter('Iterations').getValue()
     const numJoints = this.__joints.length
     const tipJoint = this.__joints[numJoints - 1]
 
@@ -201,9 +230,10 @@ class IKSolver extends Operator {
         const vecBaseToJoint = tipJoint.xfo.tr.subtract(rootXfo.tr)
         for (let j = numJoints - 1; j >= 0; j--) {
           const joint = this.__joints[j]
+          const parentJoint = this.__joints[Math.max(j - 1, 0)]
           const childJoint = this.__joints[Math.min(j + 1, numJoints - 1)]
           const isTip = j > 0 && j == numJoints - 1
-          joint.evalBackwards(childJoint, isTip, targetXfo, rootXfo, vecBaseToJoint)
+          joint.evalBackwards(parentJoint, childJoint, isTip, targetXfo, rootXfo, vecBaseToJoint)
         }
       }
       {
