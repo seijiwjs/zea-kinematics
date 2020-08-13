@@ -37,6 +37,18 @@ class CCDIKJoint {
     this.backwardsLocalTr = this.localXfo.tr.negate()
 
     this.tipVec = new Vec3()
+
+    switch (this.axisId) {
+      case 0:
+        this.axis = X_AXIS
+        break
+      case 1:
+        this.axis = Y_AXIS
+        break
+      case 2:
+        this.axis = Z_AXIS
+        break
+    }
   }
 
   preEval(parentXfo) {
@@ -153,22 +165,10 @@ class CCDIKJoint {
 
       ///////////////////////
       // Apply Hinge constraint.
-
-      let axis
-      switch (childJoint.axisId) {
-        case 0:
-          axis = X_AXIS
-          break
-        case 1:
-          axis = Y_AXIS
-          break
-        case 2:
-          axis = Z_AXIS
-          break
-      }
-
-      this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), childJoint.xfo.ori.rotateVec3(axis))
-      // this.align.setFrom2Vectors(childJoint.xfo.ori.rotateVec3(axis), this.xfo.ori.rotateVec3(axis))
+      this.align.setFrom2Vectors(
+        this.xfo.ori.rotateVec3(childJoint.axis),
+        childJoint.xfo.ori.rotateVec3(childJoint.axis)
+      )
       this.xfo.ori = this.align.multiply(this.xfo.ori)
 
       ///////////////////////
@@ -213,22 +213,10 @@ class CCDIKJoint {
 
     ///////////////////////
     // Apply Hinge constraint.
-    let axis
-    switch (this.axisId) {
-      case 0:
-        axis = X_AXIS
-        break
-      case 1:
-        axis = Y_AXIS
-        break
-      case 2:
-        axis = Z_AXIS
-        break
-    }
     if (isBase) {
-      this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), rootXfo.ori.rotateVec3(axis))
+      this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(this.axis), rootXfo.ori.rotateVec3(this.axis))
     } else {
-      this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), parentJoint.xfo.ori.rotateVec3(axis))
+      this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(this.axis), parentJoint.xfo.ori.rotateVec3(this.axis))
     }
     this.xfo.ori = this.align.multiply(this.xfo.ori)
   }
@@ -375,7 +363,7 @@ class CCDIKSolver extends Operator {
     }
     const rootXfo = this.getInput('Root').isConnected() ? this.getInput('Root').getValue() : identityXfo
     const targetXfo = this.getInput('Target').getValue()
-    const iterations = 3 //this.getParameter('Iterations').getValue()
+    const iterations = 1 //this.getParameter('Iterations').getValue()
     const numJoints = this.__joints.length
     const tipJoint = this.__joints[numJoints - 1]
 
