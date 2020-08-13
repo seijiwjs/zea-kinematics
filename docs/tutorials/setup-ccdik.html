@@ -18,7 +18,7 @@
   <div id="viewport"></div>
 </body>
 <script type="module">
-  import { Vec3, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Cone, Sphere, Cuboid, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { Vec3, Quat, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Cone, Sphere, Cuboid, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
   import { CCDIKSolver } from '../libs/zea-kinematics/dist/index.rawimport.js'
 
   const domElement = document.getElementById("viewport")
@@ -55,7 +55,7 @@
   const targGeomItem = new GeomItem('target', targGeom, targGeomMaterial)
   const targXfo = new Xfo()
   // targXfo.tr.set(-0.4, .5, .5)
-  targXfo.tr.set(-0.5, .0, .5)
+  targXfo.tr.set(-0.8, .3, .5)
   targXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
   targGeomItem.getParameter('LocalXfo').setValue(targXfo)
   treeItem.addChild(targGeomItem)
@@ -70,11 +70,12 @@
   // ///////////////////////////////////////
   // Setup Joint 0
 
-  function addJoint(name, prevJoint, length, width, height, axis) {
+  function addJoint(name, prevJoint, ori, length, width, height, axis) {
     const jointGeom = new Cuboid(width, height, length, true)
     const joint = new GeomItem(name, jointGeom, chainMaterial)
     const joint1xfo = new Xfo()
     joint1xfo.tr.set(0, 0, prevJoint.length)
+    joint1xfo.ori = ori
     joint.length = length
     joint.getParameter('LocalXfo').setValue(joint1xfo)
     prevJoint.addChild(joint, false)
@@ -82,11 +83,19 @@
     ikSolver.addJoint(joint.getParameter('GlobalXfo'), axis)
     return joint
   }
-  const joint0 = addJoint('joint0', base, 0.6, 0.1, 0.05, 1)
-  const joint1 = addJoint('joint1', joint0, 0.1, 0.08, 0.03, 1)
-  const joint2 = addJoint('joint2', joint1, 0.4, 0.06, 0.03, 2)
-  const joint3 = addJoint('joint3', joint2, 0.08, 0.04, 0.03, 1)
-  const tip = addJoint('tip', joint3, 0.05, 0.03, 0.03, 2)
+  
+  const ori = new Quat()
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.5)
+  const joint0 = addJoint('joint0', base, ori, 0.6, 0.1, 0.05, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.5)
+  const joint1 = addJoint('joint1', joint0, ori, 0.1, 0.08, 0.03, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
+  const joint2 = addJoint('joint2', joint1, ori, 0.4, 0.06, 0.03, 2)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.5)
+  const joint3 = addJoint('joint3', joint2, ori, 0.08, 0.04, 0.03, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
+  const joint4 = addJoint('joint4', joint3, ori, 0.05, 0.03, 0.03, 2)
+  // const tip = addJoint('tip', joint4, 0.05, 0.03, 0.03, 2)
   ikSolver.enable()
 
   // ///////////////////////////////////////
