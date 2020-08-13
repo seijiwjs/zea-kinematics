@@ -55,7 +55,7 @@
   const targGeomItem = new GeomItem('target', targGeom, targGeomMaterial)
   const targXfo = new Xfo()
   // targXfo.tr.set(-0.4, .5, .5)
-  targXfo.tr.set(-0.8, .3, .5)
+  targXfo.tr.set(-0.5, .3, 0.5)
   targXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
   targGeomItem.getParameter('LocalXfo').setValue(targXfo)
   treeItem.addChild(targGeomItem)
