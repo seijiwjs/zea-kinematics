@@ -19,7 +19,7 @@
 </body>
 <script type="module">
   import { Vec3, Quat, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Cone, Sphere, Cuboid, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
-  import { CCDIKSolver } from '../libs/zea-kinematics/dist/index.rawimport.js'
+  import { IKSolver } from '../libs/zea-kinematics/dist/index.rawimport.js'
 
   const domElement = document.getElementById("viewport")
 
@@ -62,7 +62,7 @@
 
   // ///////////////////////////////////////
   // Setup the Solver
-  const ikSolver = new CCDIKSolver("ikSolver")
+  const ikSolver = new IKSolver("ikSolver")
   ikSolver.getInput('Target').setParam(targGeomItem.getParameter('GlobalXfo'))
   ikSolver.addJoint(base.getParameter('GlobalXfo'), 2)
   treeItem.addChild(ikSolver)

@@ -18,7 +18,7 @@ const Y_AXIS = new Vec3(0, 1, 0)
 const Z_AXIS = new Vec3(0, 0, 1)
 const identityXfo = new Xfo()
 
-class CCDIKJoint {
+class IKJoint {
   constructor(globalXfoParam, axisId = 0) {
     this.axisId = axisId
     this.limits = [-Math.PI, Math.PI]
@@ -57,104 +57,10 @@ class CCDIKJoint {
     // this.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(this.bindLocalXfo.tr))
   }
 
-  // evalBackwards(childJoint, isTip, targetXfo) {
-  //   if (isTip) {
-  //     this.xfo.ori = targetXfo.ori
-  //   } else {
-  //     const childVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-  //     // this.tipVec = childJoint.xfo.ori.rotateVec3(childJoint.tipVec).add(childVec)
-  //     this.tipVec = childJoint.tipVec.add(childVec)
-
-  //     const targetVec = targetXfo.tr.subtract(this.xfo.tr)
-  //     targetVec.normalizeInPlace()
-
-  //     this.align.setFrom2Vectors(this.tipVec.normalize(), targetVec)
-  //     // align.alignWith(new Quat())
-
-  //     this.xfo.ori = this.align.multiply(this.xfo.ori)
-
-  //     this.tipVec = this.align.rotateVec3(this.tipVec)
-  //   }
-
-  //   ///////////////////////
-  //   // Apply Hinge constraint.
-
-  //   let axis
-  //   switch (childJoint.axisId) {
-  //     case 0:
-  //       axis = X_AXIS
-  //       break
-  //     case 1:
-  //       axis = Y_AXIS
-  //       break
-  //     case 2:
-  //       axis = Z_AXIS
-  //       break
-  //   }
-
-  //   this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), childJoint.xfo.ori.rotateVec3(axis))
-  //   this.xfo.ori = this.align.multiply(this.xfo.ori)
-
-  //   ///////////////////////
-  //   // Apply angle Limits.
-
-  //   // const currAngle = Math.acos(this.xfo.ori.dot(parentXfo.ori))
-  //   // if (currAngle < childJoint.limits[0] || currAngle > childJoint.limits[1]) {
-  //   //   const deltaAngle =
-  //   //     currAngle < childJoint.limits[0] ? childJoint.limits[0] - currAngle : currAngle - childJoint.limits[1]
-  //   //   this.align.setFromAxisAndAngle(globalAxis, deltaAngle)
-  //   //   this.xfo.ori = this.align.multiply(this.xfo.ori)
-  //   // }
-  // }
-
-  // evalForwards(parentJoint, childJoint, isBase, isTip, rootXfo, targetXfo) {
-  //   if (isBase) {
-  //     this.xfo.tr = rootXfo.tr.add(rootXfo.ori.rotateVec3(this.forwardLocalTr))
-  //   } else {
-  //     this.xfo.tr = parentJoint.xfo.tr.add(parentJoint.xfo.ori.rotateVec3(this.forwardLocalTr))
-  //   }
-  //   // if (isTip) {
-  //   //   this.xfo.ori = targetXfo.ori
-  //   // } else {
-  //   //   const currVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-  //   //   currVec.normalizeInPlace()
-  //   //   const targetVec = childJoint.xfo.tr.subtract(this.xfo.tr)
-  //   //   targetVec.normalizeInPlace()
-  //   //   this.align.setFrom2Vectors(currVec, targetVec)
-  //   //   this.xfo.ori = this.align.multiply(this.xfo.ori)
-  //   // }
-  //   // ///////////////////////
-  //   // // Apply Hinge constraint.
-  //   // let axis
-  //   // switch (this.axisId) {
-  //   //   case 0:
-  //   //     axis = X_AXIS
-  //   //     break
-  //   //   case 1:
-  //   //     axis = Y_AXIS
-  //   //     break
-  //   //   case 2:
-  //   //     axis = Z_AXIS
-  //   //     break
-  //   // }
-  //   // if (isBase) {
-  //   //   this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), rootXfo.ori.rotateVec3(axis))
-  //   // } else {
-  //   //   this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), parentJoint.xfo.ori.rotateVec3(axis))
-  //   // }
-  //   // this.xfo.ori = this.align.multiply(this.xfo.ori)
-  // }
-
   evalBackwards(childJoint, isTip, targetXfo, rootXfo, vecBaseToJoint) {
     if (isTip) {
       this.xfo = targetXfo.clone()
     } else {
-      // const currVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-      // currVec.normalizeInPlace()
-      // const targetVec = childJoint.xfo.tr.subtract(this.xfo.tr)
-      // targetVec.normalizeInPlace()
-      // this.align.setFrom2Vectors(currVec, targetVec)
-
       const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
 
       const targetVec = childJoint.xfo.tr.subtract(rootXfo.tr)
@@ -195,13 +101,6 @@ class CCDIKJoint {
     if (isTip) {
       this.xfo.ori = targetXfo.ori
     } else {
-      // const currVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-      // currVec.normalizeInPlace()
-      // const targetVec = childJoint.xfo.tr.subtract(this.xfo.tr)
-      // targetVec.normalizeInPlace()
-      // this.align.setFrom2Vectors(currVec, targetVec)
-      // this.xfo.ori = this.align.multiply(this.xfo.ori)
-
       const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
 
       const targetVec = targetXfo.tr.subtract(this.xfo.tr)
@@ -221,81 +120,6 @@ class CCDIKJoint {
     this.xfo.ori = this.align.multiply(this.xfo.ori)
   }
 
-  /**
-   * The evaluate method.
-  evaluate(parentXfo, tipXfo, targetXfo, isTip) {
-    if (isTip) {
-      // this.xfo.ori = targetXfo.ori
-
-      const tipVec = this.xfo.ori.getZaxis()
-      const targetVec = targetXfo.ori.getZaxis()
-      this.align.setFrom2Vectors(tipVec, targetVec)
-      this.xfo.ori = this.align.multiply(this.xfo.ori)
-    } else {
-      const tipVec = tipXfo.tr.subtract(this.xfo.tr)
-      tipVec.normalizeInPlace()
-      const targetVec = targetXfo.tr.subtract(this.xfo.tr)
-      targetVec.normalizeInPlace()
-
-      this.align.setFrom2Vectors(tipVec, targetVec)
-      // align.alignWith(new Quat())
-
-      this.xfo.ori = this.align.multiply(this.xfo.ori)
-    }
-
-    ///////////////////////
-    // Apply Hinge constraint.
-
-    let axis
-    switch (this.axisId) {
-      case 0:
-        axis = X_AXIS
-        break
-      case 1:
-        axis = Y_AXIS
-        break
-      case 2:
-        axis = Z_AXIS
-        break
-    }
-
-    const globalAxis = parentXfo.ori.rotateVec3(axis)
-
-    this.align.setFrom2Vectors(this.xfo.ori.rotateVec3(axis), globalAxis)
-    this.xfo.ori = this.align.multiply(this.xfo.ori)
-
-    // this.align.setFrom2Vectors(this.localXfo.ori.rotateVec3(axis), axis)
-    // this.localXfo.ori = this.align.multiply(this.localXfo.ori)
-
-    ///////////////////////
-    // Apply angle Limits.
-
-    const currAngle = Math.acos(this.xfo.ori.dot(parentXfo.ori))
-    if (currAngle < this.limits[0] || currAngle > this.limits[1]) {
-      const deltaAngle = currAngle < this.limits[0] ? this.limits[0] - currAngle : currAngle - this.limits[1]
-      this.align.setFromAxisAndAngle(globalAxis, deltaAngle)
-      this.xfo.ori = this.align.multiply(this.xfo.ori)
-    }
-
-    ///////////////////////
-    // Calculate Local
-    this.localXfo.ori = parentXfo.ori.inverse().multiply(this.xfo.ori)
-    this.localXfo.ori.normalizeInPlace()
-  }
-
-  forwardPropagate(parentXfo, targetXfo, isTip) {
-    // if (isTip) {
-    //   this.xfo.ori = targetXfo.ori
-    // }
-    // this.xfo.tr = parentXfo.ori.rotateVec3(this.localXfo.tr)
-
-    // this.xfo = parentXfo.multiply(this.localXfo)
-
-    this.xfo.ori = parentXfo.ori.multiply(this.localXfo.ori)
-    this.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(this.localXfo.tr))
-  }
-   */
-
   setClean() {
     this.output.setClean(this.xfo)
   }
@@ -304,7 +128,7 @@ class CCDIKJoint {
 /** An operator for aiming items at targets.
  * @extends Operator
  */
-class CCDIKSolver extends Operator {
+class IKSolver extends Operator {
   /**
    * Create a gears operator.
    * @param {string} name - The name value.
@@ -333,7 +157,7 @@ class CCDIKSolver extends Operator {
     const rootXfo = this.getInput('Root').isConnected() ? this.getInput('Root').getValue() : identityXfo
 
     // const output = this.addOutput(new OperatorOutput('Joint', OperatorOutputMode.OP_READ_WRITE))
-    const joint = new CCDIKJoint(globalXfoParam, axisId)
+    const joint = new IKJoint(globalXfoParam, axisId)
 
     const output = this.addOutput(new OperatorOutput('Joint' + this.__joints.length))
 
@@ -363,7 +187,7 @@ class CCDIKSolver extends Operator {
     }
     const rootXfo = this.getInput('Root').isConnected() ? this.getInput('Root').getValue() : identityXfo
     const targetXfo = this.getInput('Target').getValue()
-    const iterations = 1 //this.getParameter('Iterations').getValue()
+    const iterations = 10 //this.getParameter('Iterations').getValue()
     const numJoints = this.__joints.length
     const tipJoint = this.__joints[numJoints - 1]
 
@@ -373,17 +197,6 @@ class CCDIKSolver extends Operator {
     }
 
     for (let i = 0; i < iterations; i++) {
-      // for (let j = numJoints - 1; j >= 0; j--) {
-      //   const joint = this.__joints[j]
-      //   const parentXfo = j > 0 ? this.__joints[j - 1].xfo : rootXfo
-      //   joint.evaluate(parentXfo, tipJoint.xfo, targetXfo, j > 0 && j == numJoints - 1)
-
-      //   // Now re-calculate the chain pose from this point onward.
-      //   for (let k = j + 1; k < numJoints; k++) {
-      //     this.__joints[k].forwardPropagate(this.__joints[k - 1].xfo, targetXfo, k > 0 && k == numJoints - 1)
-      //   }
-      // }
-
       {
         const vecBaseToJoint = tipJoint.xfo.tr.subtract(rootXfo.tr)
         for (let j = numJoints - 1; j >= 0; j--) {
@@ -404,22 +217,6 @@ class CCDIKSolver extends Operator {
           joint.evalForwards(parentJoint, childJoint, isBase, isTip, rootXfo, targetXfo, vecBaseToJoint)
         }
       }
-
-      // for (let j = numJoints - 1; j >= 0; j--) {
-      //   const joint = this.__joints[j]
-      //   const childJoint = this.__joints[Math.min(j + 1, numJoints - 1)]
-      //   const isTip = j > 0 && j == numJoints - 1
-      //   joint.evalBackwards(childJoint, isTip, targetXfo)
-      // }
-
-      // for (let j = 0; j < numJoints; j++) {
-      //   const joint = this.__joints[j]
-      //   const parentJoint = this.__joints[Math.max(j - 1, 0)]
-      //   const childJoint = this.__joints[Math.min(j + 1, numJoints - 1)]
-      //   const isBase = j == 0
-      //   const isTip = j > 0 && j == numJoints - 1
-      //   joint.evalForwards(parentJoint, childJoint, isBase, isTip, rootXfo, targetXfo)
-      // }
     }
 
     // Now store the value to the connected Xfo parameter.
@@ -429,6 +226,6 @@ class CCDIKSolver extends Operator {
   }
 }
 
-Registry.register('CCDIKSolver', CCDIKSolver)
+Registry.register('IKSolver', IKSolver)
 
-export { CCDIKSolver }
+export { IKSolver }
