@@ -44,11 +44,6 @@ class AimOperator extends Operator {
     this.getParameter('Initial Dist').setValue(dist)
   }
 
-  __parameterValueChanged(event) {
-    // super.__parameterValueChanged(event)
-    // this.setDirty()
-  }
-
   /**
    * The evaluate method.
    */
