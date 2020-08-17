@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZEA CAD - Setup Aim</title>
+  <style type="text/css">
+    html, body {
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport"></div>
+</body>
+<script type="module">
+  import { Vec3, Quat, Xfo, Color, Material, NumberParameter, TreeItem, GeomItem, Cuboid, Cone, Sphere, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { ColorTrack, XfoTrack, TrackSampler } from '../libs/zea-kinematics/dist/index.rawimport.js'
+
+  const domElement = document.getElementById("viewport")
+
+  const scene = new Scene()
+  const renderer = new GLRenderer(domElement)
+  renderer.setScene(scene)
+  renderer
+    .getViewport()
+    .getCamera()
+    .setPositionAndTarget(new Vec3(3, 3, 1), new Vec3(0, 0, 0))
+
+  scene.setupGrid(10.0, 10)
+
+  const treeItem = new TreeItem("tree")
+  scene.getRoot().addChild(treeItem)
+  const timeParam = new NumberParameter('time', 0)
+  treeItem.addParameter(timeParam)
+
+  const cubeMaterial = new Material('cubeMaterial', 'SimpleSurfaceShader')
+  cubeMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  const cubeItem = new GeomItem('aim', new Cuboid(0.1, 0.2, 0.3), cubeMaterial)
+  treeItem.addChild(cubeItem)
+
+  const ori1 = new Quat()
+  ori1.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI)
+
+  const ori2 = new Quat()
+  ori2.setFromAxisAndAngle(new Vec3(0, 0, 1), Math.PI * 0.5)
+
+  const colorTrack = new ColorTrack("ColorTrack")
+  colorTrack.addKey(0, new Color())
+  colorTrack.addKey(1000, new Color(0, 0, 1))
+  colorTrack.addKey(2000, new Color(1, 0, 1))
+  colorTrack.addKey(3000, new Color(1, 1, 1))
+  colorTrack.addKey(4000, new Color(0, 1, 1))
+  colorTrack.addKey(5000, new Color(0, 0, 0))
+
+
+  const xfoTrack = new XfoTrack("XfoTrack")
+  xfoTrack.addKey(0, new Xfo())
+  xfoTrack.addKey(1000, new Xfo(new Vec3(0, 0, 1), ori1))
+  xfoTrack.addKey(2000, new Xfo(new Vec3(1, 0, 1), ori1))
+  xfoTrack.addKey(3000, new Xfo(new Vec3(1, 1, 1), ori2))
+  xfoTrack.addKey(4000, new Xfo(new Vec3(0, 1, 1), ori2))
+  xfoTrack.addKey(5000, new Xfo(new Vec3(0, 0, 0)))
+
+  const colorTrackSampler = new TrackSampler("colorTrack", colorTrack)
+  colorTrackSampler.getInput('Time').setParam(timeParam)
+  colorTrackSampler.getOutput('Output').setParam(cubeMaterial.getParameter('BaseColor'))
+
+  const xfoTrackSampler = new TrackSampler("XfoTrack", xfoTrack)
+  xfoTrackSampler.getInput('Time').setParam(timeParam)
+  xfoTrackSampler.getOutput('Output').setParam(cubeItem.getParameter('GlobalXfo'))
+
+  let time = 0
+  setInterval(()=> {
+    time += 20
+    timeParam.setValue(time)
+
+    if (time > 5000) time = 0
+  }, 20)
+
+ 
+</script>
+</html>
