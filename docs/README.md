@@ -13,7 +13,7 @@ If you are new to web development, make sure to read the [Recommended Web Develo
 
 If it's your first time using the engine, make sure you read the [Getting Started Using the Engine](getting-started/get-started-with-engine.md) to learn how to work with the engine.
 
-If you are primarily interested in working with CAD data, you can find information on the Zea CAD Plugin on the [Plugins and Tools](plugins-and-tools.md) page.
+If you are primarily interested in working with CAD data, you can find information on the Zea Kinematics Plugin on the [Plugins and Tools](plugins-and-tools.md) page.
 
 ## Licensing
 
