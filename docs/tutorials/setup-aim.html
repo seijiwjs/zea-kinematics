@@ -37,18 +37,18 @@
   scene.getRoot().addChild(treeItem)
   
   const aimGeom = new Cone(0.2, 1.0, 30, true)
-  const aimGeomMaterial = new Material('aimGeommaterial', 'SimpleSurfaceShader')
+  const aimGeomMaterial = new Material('aimGeomMaterial', 'SimpleSurfaceShader')
   aimGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
   const aimGeomItem = new GeomItem('aim', aimGeom, aimGeomMaterial)
   treeItem.addChild(aimGeomItem)
 
   const targGeom = new Sphere(0.04, 30)
-  const targGeomMaterial = new Material('targGeommaterial', 'SimpleSurfaceShader')
+  const targGeomMaterial = new Material('targGeomMaterial', 'SimpleSurfaceShader')
   targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
   const targGeomItem = new GeomItem('aim', targGeom, targGeomMaterial)
-  const xfo = new Xfo()
-  xfo.tr.set(-1, 1, 1)
-  targGeomItem.getParameter('LocalXfo').setValue(xfo)
+  const targXfo = new Xfo()
+  targXfo.tr.set(-1, 1, 1)
+  targGeomItem.getParameter('LocalXfo').setValue(targXfo)
   treeItem.addChild(targGeomItem)
 
   const aimOp = new AimOperator("AimOp")
