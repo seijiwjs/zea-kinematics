@@ -12,9 +12,22 @@ class TrackSampler extends Operator {
     super(name)
 
     this.track = track
+    this.track.on('keyAdded', this.setDirty.bind(this))
+    this.track.on('keyRemoved', this.setDirty.bind(this))
+    this.track.on('keyValueChanged', this.setDirty.bind(this))
 
     this.addInput(new OperatorInput('Time'))
     this.addOutput(new OperatorOutput('Output', OperatorOutputMode.OP_WRITE))
+  }
+
+  /**
+   * @param {Xfo} value - The value param.
+   * @return {any} - The modified value.
+   */
+  backPropagateValue(value) {
+    const time = this.getInput('Time').getValue()
+    this.track.setValue(time, value)
+    return value
   }
 
   /**

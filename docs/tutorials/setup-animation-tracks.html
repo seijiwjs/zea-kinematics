@@ -12,14 +12,66 @@
       margin: 0;
       padding: 0;
     }
+    #timeline {
+      position: absolute;
+      height: 40px;
+      width: calc(100% - 80px);
+      bottom: 0px;
+      margin: 0;
+      padding: 0;
+      border: #545454;
+      border-style: solid;
+      border-width: 1px;
+    }
+    #timebar {
+      position: absolute;
+      height: 40px;
+      width: 10px;
+      bottom: 0px;
+      background-color: red;
+    }
+    #prevkey {
+      position: absolute;
+      height: 40px;
+      width: 40px;
+      right: 40px;
+      bottom: 0px;
+      background-color: burlywood;
+      border: #545454;
+      border-style: solid;
+      border-width: 1px;
+    }
+    #nextkey {
+      position: absolute;
+      height: 40px;
+      width: 40px;
+      right: 0px;
+      bottom: 0px;
+      background-color: burlywood;
+      border: #545454;
+      border-style: solid;
+      border-width: 1px;
+    }
   </style>
 </head>
 <body>
   <div id="viewport"></div>
+  <div id="timeline">
+    <div id="timebar"></div>
+  </div>
+  <div id="prevkey"><</div>
+  <div id="nextkey">></div>
 </body>
 <script type="module">
   import { Vec3, Quat, Xfo, Color, Material, NumberParameter, TreeItem, GeomItem, Cuboid, Cone, Sphere, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
-  import { ColorTrack, XfoTrack, TrackSampler } from '../libs/zea-kinematics/dist/index.rawimport.js'
+  import { ColorTrack, XfoTrack, TrackSampler, XfoTrackDisplay } from '../libs/zea-kinematics/dist/index.rawimport.js'
+  import { 
+  SelectionManager,
+  ToolManager,
+  ViewTool,
+  HandleTool,
+  SelectionTool,
+  UndoRedoManager, } from '../libs/zea-ux/dist/index.rawimport.js'
 
   const domElement = document.getElementById("viewport")
 
@@ -74,14 +126,131 @@
   xfoTrackSampler.getInput('Time').setParam(timeParam)
   xfoTrackSampler.getOutput('Output').setParam(cubeItem.getParameter('GlobalXfo'))
 
-  let time = 0
-  setInterval(()=> {
-    time += 20
+  const TrackDisplay = new XfoTrackDisplay(xfoTrack)
+  treeItem.addChild(TrackDisplay)
+
+  ///////////////////////////////////////////////////
+  // Setup the time bar
+
+  const timeline = document.getElementById("timeline")
+  const timeBar = document.getElementById("timebar")
+  const prevKey = document.getElementById("prevkey")
+  const nextKey = document.getElementById("nextkey")
+  
+  let playingId = false
+  const play = () => {
+    let time = timeParam.getValue()
+    if (!playingId) {
+      playingId = setInterval(()=> {
+      time += 20
+      timeParam.setValue(time)
+      if (time > 5000) time = 0
+    }, 20)
+    }
+  }
+  const stop = () => {
+    clearInterval(playingId)
+    playingId = null
+  }
+  const setTime = (time) => {
     timeParam.setValue(time)
+  }
+  play()
+  
+  document.addEventListener('keydown', (event) => {
+    const key = String.fromCharCode(event.keyCode).toLowerCase()
+    switch (key) {
+      case ' ': 
+        if (playingId) stop()
+        else play()
+        break
+      case 'w': 
+        selectionManager.showHandles('Translate')
+        break
+      case 'e': 
+        selectionManager.showHandles('Rotate')
+        break
+      case '': {
+        const time = timeParam.getValue()
+        const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+        if (keyAndLerp.lerp == 0.0) {
+          xfoTrack.removeKey(keyAndLerp.keyIndex)
+        }
+        break
+    }
+    }
+  })
 
-    if (time > 5000) time = 0
-  }, 20)
+  timeline.addEventListener('mousedown', (event)=> {
+    if (playingId) stop()
+    dragTimeBar(event)
+    document.addEventListener('mousemove', dragTimeBar)
+    document.addEventListener('mouseup', endDragTimeBar)
+  })
+  const dragTimeBar = (event)=> {
+    const time = ((event.clientX - 5) / timeline.offsetWidth) * 5000
+    setTime(time)
+  }
+  const endDragTimeBar = (event)=> {
+    document.removeEventListener('mousemove', dragTimeBar)
+    document.removeEventListener('mouseup', endDragTimeBar)
+  }
 
- 
+  timeParam.on('valueChanged', () =>{
+    const time = timeParam.getValue()
+    timeBar.style.left = `${(time / 5000) * timeline.offsetWidth}px`
+  })
+  prevKey.addEventListener('mousedown', () => {
+    if (playingId) stop()
+    const time = timeParam.getValue()
+    const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+    if (keyAndLerp.lerp > 0.0) {
+      const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex)
+      timeParam.setValue(time)
+    } else if (keyAndLerp.keyIndex > 0) {
+      const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex-1)
+      timeParam.setValue(time)
+    } else {
+      const time = xfoTrack.getKeyTime(xfoTrack.getNumKeys()-1)
+      timeParam.setValue(time)
+    }
+  })
+  nextKey.addEventListener('mousedown', () => {
+    if (playingId) stop()
+    const time = timeParam.getValue()
+    const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+    if (keyAndLerp.keyIndex < xfoTrack.getNumKeys()-1) {
+      const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex + 1)
+      timeParam.setValue(time)
+    } else {
+      const time = xfoTrack.getKeyTime(0)
+      timeParam.setValue(time)
+    }
+  })
+
+
+const appData = {
+  scene,
+  renderer
+}
+
+const selectionManager = new SelectionManager(appData, {
+  enableXfoHandles: true,
+})
+selectionManager.on('selectionChanged', (event) => {
+  event.selection.forEach((item) => console.log(item.getPath()))
+})
+const undoRedoManager = new UndoRedoManager()
+renderer.setUndoRedoManager(undoRedoManager)
+
+selectionManager.setSelection(new Set([cubeItem]), false)
+
+////////////////////////////////////////////////////
+// Setup the tools.
+
+// Connect the selection manager to the renderer
+// so it can display transform handles.
+selectionManager.setRenderer(renderer)
+
 </script>
 </html>
