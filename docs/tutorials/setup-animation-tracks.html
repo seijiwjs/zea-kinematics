@@ -129,6 +129,29 @@
   const TrackDisplay = new XfoTrackDisplay(xfoTrack)
   treeItem.addChild(TrackDisplay)
 
+  ////////////////////////////////////////////////////
+  // Setup the tools.
+
+  const appData = {
+    scene,
+    renderer
+  }
+
+  const selectionManager = new SelectionManager(appData, {
+    enableXfoHandles: true,
+  })
+  selectionManager.on('selectionChanged', (event) => {
+    event.selection.forEach((item) => console.log(item.getPath()))
+  })
+  const undoRedoManager = UndoRedoManager.getInstance()
+  renderer.setUndoRedoManager(undoRedoManager)
+
+  selectionManager.setSelection(new Set([cubeItem]), false)
+
+  // Connect the selection manager to the renderer
+  // so it can display transform handles.
+  selectionManager.setRenderer(renderer)
+
   ///////////////////////////////////////////////////
   // Setup the time bar
 
@@ -139,11 +162,11 @@
   
   let playingId = false
   const play = () => {
-    let time = timeParam.getValue()
+    let time = Math.round(timeParam.getValue())
     if (!playingId) {
       playingId = setInterval(()=> {
       time += 20
-      timeParam.setValue(time)
+      timeParam.setValue(Math.round(time))
       if (time > 5000) time = 0
     }, 20)
     }
@@ -168,10 +191,18 @@
         selectionManager.showHandles('Translate')
         break
       case 'e': 
-        selectionManager.showHandles('Rotate')
+          selectionManager.showHandles('Rotate')
+        break
+      case 'z': 
+        if (event.ctrlKey)
+          undoRedoManager.undo()
+        break
+      case 'y': 
+        if (event.ctrlKey)
+          undoRedoManager.redo()
         break
       case '': {
-        const time = timeParam.getValue()
+        const time = Math.round(timeParam.getValue())
         const keyAndLerp = xfoTrack.findKeyAndLerp(time)
         if (keyAndLerp.lerp == 0.0) {
           xfoTrack.removeKey(keyAndLerp.keyIndex)
@@ -197,12 +228,12 @@
   }
 
   timeParam.on('valueChanged', () =>{
-    const time = timeParam.getValue()
+    const time = Math.round(timeParam.getValue())
     timeBar.style.left = `${(time / 5000) * timeline.offsetWidth}px`
   })
   prevKey.addEventListener('mousedown', () => {
     if (playingId) stop()
-    const time = timeParam.getValue()
+    const time = Math.round(timeParam.getValue())
     const keyAndLerp = xfoTrack.findKeyAndLerp(time)
     if (keyAndLerp.lerp > 0.0) {
       const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex)
@@ -217,7 +248,7 @@
   })
   nextKey.addEventListener('mousedown', () => {
     if (playingId) stop()
-    const time = timeParam.getValue()
+    const time = Math.round(timeParam.getValue())
     const keyAndLerp = xfoTrack.findKeyAndLerp(time)
     if (keyAndLerp.keyIndex < xfoTrack.getNumKeys()-1) {
       const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex + 1)
@@ -227,30 +258,6 @@
       timeParam.setValue(time)
     }
   })
-
-
-const appData = {
-  scene,
-  renderer
-}
-
-const selectionManager = new SelectionManager(appData, {
-  enableXfoHandles: true,
-})
-selectionManager.on('selectionChanged', (event) => {
-  event.selection.forEach((item) => console.log(item.getPath()))
-})
-const undoRedoManager = new UndoRedoManager()
-renderer.setUndoRedoManager(undoRedoManager)
-
-selectionManager.setSelection(new Set([cubeItem]), false)
-
-////////////////////////////////////////////////////
-// Setup the tools.
-
-// Connect the selection manager to the renderer
-// so it can display transform handles.
-selectionManager.setRenderer(renderer)
 
 </script>
 </html>

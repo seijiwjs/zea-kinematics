@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@zeainc/zea-engine": "^1.0.4",
+    "@zeainc/zea-ux": "^1.4.0",
     "docsify": "^4.11.3"
   },
   "externals": {

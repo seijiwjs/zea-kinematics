@@ -11,6 +11,8 @@ class BaseTrack extends EventEmitter {
     this.__sampleCache = {}
 
     this.__currChange = null
+    this.__secondaryChange = null
+    this.__secondaryChangeTime = -1
   }
 
   getName() {
@@ -71,6 +73,14 @@ class BaseTrack extends EventEmitter {
   }
 
   removeKey(index) {
+    // const undoRedoManager = UndoRedoManager.getInstance()
+    // const change = undoRedoManager.getCurrentChange()
+    // if (change) {
+    //   if (this.__currChange != change || this.__secondaryChangeTime != time) {
+    //     this.__currChange = change
+    //     this.__secondaryChangeTime = time
+    //   }
+    // }
     this.keys.splice(index, 1)
     const numKeys = this.keys.length
     this.emit('keysIndicesChanged', { range: [index, numKeys], delta: -1 })
@@ -116,6 +126,26 @@ class BaseTrack extends EventEmitter {
   }
 
   setValue(time, value) {
+    // const undoRedoManager = UndoRedoManager.getInstance()
+    // const change = undoRedoManager.getCurrentChange()
+    // if (change) {
+    //   if (this.__currChange != change || this.__secondaryChangeTime != time) {
+    //     this.__currChange = change
+    //     this.__secondaryChangeTime = time
+
+    //     const keyAndLerp = this.findKeyAndLerp(time)
+    //     if (keyAndLerp.lerp > 0.0) {
+    //       this.__secondaryChange = new AddKeyChange(this, time, value)
+    //       this.__currChange.secondaryChanges.push(this.__secondaryChange)
+    //     } else {
+    //       this.__secondaryChange = new KeyChange(this, keyAndLerp.keyIndex, value)
+    //       this.__currChange.secondaryChanges.push(this.__secondaryChange)
+    //     }
+    //   } else {
+    //     this.__secondaryChange.update(value)
+    //   }
+    // }
+
     const keyAndLerp = this.findKeyAndLerp(time)
     if (keyAndLerp.lerp > 0.0) {
       this.addKey(time, value)
