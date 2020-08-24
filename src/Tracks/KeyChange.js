@@ -24,4 +24,7 @@ class KeyChange extends Change {
   }
 }
 
+UndoRedoManager.registerChange('KeyChange', KeyChange)
+
 export default KeyChange
+export { KeyChange }

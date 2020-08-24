@@ -63,8 +63,8 @@
   <div id="nextkey">></div>
 </body>
 <script type="module">
-  import { Vec3, Quat, Xfo, Color, Material, NumberParameter, TreeItem, GeomItem, Cuboid, Cone, Sphere, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
-  import { ColorTrack, XfoTrack, TrackSampler, XfoTrackDisplay } from '../libs/zea-kinematics/dist/index.rawimport.js'
+  import { Vec3, Quat, Xfo, Color, Material, NumberParameter, TreeItem, GeomItem, Cuboid, Cone, Sphere, Scene, GLRenderer, Group } from '../libs/zea-engine/dist/index.esm.js'
+  import { ColorTrack, XfoTrack, TrackSampler, XfoTrackDisplay, RemoveKeyChange } from '../libs/zea-kinematics/dist/index.rawimport.js'
   import { 
   SelectionManager,
   ToolManager,
@@ -201,11 +201,22 @@
         if (event.ctrlKey)
           undoRedoManager.redo()
         break
+
+      case 'g': 
+        selectionManager.setXfoMode(Group.INITIAL_XFO_MODES.globalOri)
+        break
+      case 'l': 
+        selectionManager.setXfoMode(Group.INITIAL_XFO_MODES.average)
+        break
+
+        
       case '': {
         const time = Math.round(timeParam.getValue())
         const keyAndLerp = xfoTrack.findKeyAndLerp(time)
         if (keyAndLerp.lerp == 0.0) {
-          xfoTrack.removeKey(keyAndLerp.keyIndex)
+          // xfoTrack.removeKey(keyAndLerp.keyIndex)
+          const removeKeyChange = new RemoveKeyChange(xfoTrack, keyAndLerp.keyIndex)
+          UndoRedoManager.getInstance().addChange(removeKeyChange)
         }
         break
     }

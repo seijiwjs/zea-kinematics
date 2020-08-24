@@ -5,9 +5,21 @@ class RemoveKeyChange extends Change {
     super()
     this.track = track
     this.index = index
+    this.time = track.getKeyTime(index)
+    this.value = track.getKeyValue(index)
+    this.track.removeKey(this.index)
   }
 
-  undo() {}
+  undo() {
+    this.track.addKey(this.time, this.value)
+  }
 
-  redo() {}
+  redo() {
+    this.track.removeKey(this.index)
+  }
 }
+
+UndoRedoManager.registerChange('RemoveKeyChange', RemoveKeyChange)
+
+export default RemoveKeyChange
+export { RemoveKeyChange }
