@@ -19,7 +19,8 @@ const Z_AXIS = new Vec3(0, 0, 1)
 const identityXfo = new Xfo()
 
 class IKJoint {
-  constructor(globalXfoParam, axisId = 0) {
+  constructor(index, axisId = 0) {
+    this.index = index
     this.axisId = axisId
     this.limits = [-Math.PI, Math.PI]
     this.align = new Quat()
@@ -77,20 +78,28 @@ class IKJoint {
     } else {
       const targetVec = childJoint.xfo.tr.subtract(baseXfo.tr)
       const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
-      const twist = childJoint.isTwistJoint
+      const twist = true //childJoint.isTwistJoint
       if (twist) {
-        this.xfo.ori = childJoint.xfo.ori.multiply(this.backwardsLocal.ori)
+        // this.xfo.ori = childJoint.xfo.ori.multiply(this.backwardsLocal.ori)
 
-        const targetDir = targetVec.normalize()
+        // const targetDir = targetVec.normalize()
+        // const childTwistVec = childJoint.xfo.ori.rotateVec3(childJoint.axis)
+        // const planeNormal = targetDir.cross(childTwistVec)
+        // const alignAxis = planeNormal.cross(childTwistVec).normalize()
+        // // const targetDir = targetVec.subtract(targetVec.scale(targetVec.dot(childTwistVec))).normalize()
+        // // const alignAxis = targetDir.cross(childTwistVec).normalize()
+        // const jointAxis = this.xfo.ori.rotateVec3(this.axis)
+        // // Now twist the joint around the child joint axis to align this joint
+        // this.align.setFrom2Vectors(jointAxis, alignAxis)
+        // this.xfo.ori = this.align.multiply(this.xfo.ori)
+
         const childTwistVec = childJoint.xfo.ori.rotateVec3(childJoint.axis)
-        const planeNormal = targetDir.cross(childTwistVec)
-        const alignAxis = planeNormal.cross(childTwistVec).normalize()
-        // const targetDir = targetVec.subtract(targetVec.scale(targetVec.dot(childTwistVec))).normalize()
-        // const alignAxis = targetDir.cross(childTwistVec).normalize()
-        const jointAxis = this.xfo.ori.rotateVec3(this.axis)
-        // Now twist the joint around the child joint axis to align this joint
-        this.align.setFrom2Vectors(jointAxis, alignAxis)
+        const vec0 = jointToTip.subtract(jointToTip.scale(jointToTip.dot(childTwistVec)))
+        const vec1 = targetVec.subtract(targetVec.scale(targetVec.dot(childTwistVec)))
+        this.align.setFrom2Vectors(vec0.normalize(), vec1.normalize())
+        if (this.index == 1) console.log(this.index, vec0.toString(), vec1.toString())
         this.xfo.ori = this.align.multiply(this.xfo.ori)
+        this.xfo.ori.normalizeInPlace()
       } else {
         this.align.setFrom2Vectors(jointToTip.normalize(), targetVec.normalize())
         // this.align.alignWith(this.xfo.ori)
@@ -135,15 +144,23 @@ class IKJoint {
       } else {
         jointToTip.subtractInPlace(parentJoint.xfo.ori.rotateVec3(this.forwardLocalTr))
       }
-      const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
       const targetVec = targetXfo.tr.subtract(this.xfo.tr)
-      if (this.axisId == -2) {
-        if (targetVec.normalize().angleTo(jointVec.normalize()) > 0.0001) {
-          const alignAxis = targetVec.cross(jointVec).normalize()
-          const childAxis = this.xfo.ori.rotateVec3(childJoint.axis)
-          this.align.setFrom2Vectors(childAxis, alignAxis)
-          this.xfo.ori = this.align.multiply(this.xfo.ori)
-        }
+
+      const twist = true //this.isTwistJoint
+      if (twist) {
+        // const jointVec = this.xfo.ori.rotateVec3(childJoint.forwardLocalTr)
+        // if (targetVec.normalize().angleTo(jointVec.normalize()) > 0.0001) {
+        //   const alignAxis = targetVec.cross(jointVec).normalize()
+        //   const childAxis = this.xfo.ori.rotateVec3(childJoint.axis)
+        //   this.align.setFrom2Vectors(childAxis, alignAxis)
+        //   this.xfo.ori = this.align.multiply(this.xfo.ori)
+        // }
+
+        const twistVec = this.xfo.ori.rotateVec3(this.axis)
+        const vec0 = jointToTip.subtract(jointToTip.scale(jointToTip.dot(twistVec)))
+        const vec1 = targetVec.subtract(targetVec.scale(targetVec.dot(twistVec)))
+        this.align.setFrom2Vectors(vec0.normalize(), vec1.normalize())
+        this.xfo.ori = this.align.multiply(this.xfo.ori)
       } else {
         this.align.setFrom2Vectors(jointToTip.normalize(), targetVec.normalize())
         this.xfo.ori = this.align.multiply(this.xfo.ori)
@@ -195,7 +212,7 @@ class IKSolver extends Operator {
 
   addJoint(globalXfoParam, axisId = 0) {
     // const output = this.addOutput(new OperatorOutput('Joint', OperatorOutputMode.OP_READ_WRITE))
-    const joint = new IKJoint(globalXfoParam, axisId)
+    const joint = new IKJoint(this.__joints.length, axisId)
 
     const output = this.addOutput(new OperatorOutput('Joint' + this.__joints.length))
     output.setParam(globalXfoParam)
@@ -251,17 +268,17 @@ class IKSolver extends Operator {
           joint.evalBackwards(parentJoint, childJoint, isTip, targetXfo, baseXfo, jointToTip)
         }
       }
-      {
-        const jointToTip = tipJoint.xfo.tr.subtract(baseXfo.tr)
-        for (let j = 0; j < numJoints; j++) {
-          const joint = this.__joints[j]
-          const parentJoint = this.__joints[Math.max(j - 1, 0)]
-          const childJoint = this.__joints[Math.min(j + 1, numJoints - 1)]
-          const isBase = j == 0
-          const isTip = j > 0 && j == numJoints - 1
-          joint.evalForwards(parentJoint, childJoint, isBase, isTip, baseXfo, targetXfo, jointToTip)
-        }
-      }
+      // {
+      //   const jointToTip = tipJoint.xfo.tr.subtract(baseXfo.tr)
+      //   for (let j = 0; j < numJoints; j++) {
+      //     const joint = this.__joints[j]
+      //     const parentJoint = this.__joints[Math.max(j - 1, 0)]
+      //     const childJoint = this.__joints[Math.min(j + 1, numJoints - 1)]
+      //     const isBase = j == 0
+      //     const isTip = j > 0 && j == numJoints - 1
+      //     joint.evalForwards(parentJoint, childJoint, isBase, isTip, baseXfo, targetXfo, jointToTip)
+      //   }
+      // }
     }
 
     // Now store the value to the connected Xfo parameter.
