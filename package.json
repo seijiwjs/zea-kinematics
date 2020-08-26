@@ -27,12 +27,13 @@
     "build": "rollup -c",
     "build:watch": "rollup -c rollup.config.dev.js -w",
     "dist": "yarn publish --access=public",
-    "docs": "adg",
+    "docs": "adg --config adg.config.json",
+    "docs-w": "adg -w --config=adg.config.json",
     "prepare": "yarn build",
     "start": "rollup -c rollup.config.dev.js -w"
   },
   "devDependencies": {
-    "@zeainc/jsdocs2md": "^1.0.0-rc.5",
+    "@zeainc/jsdocs2md": "^0.0.3",
     "docsify-cli": "^4.4.1",
     "eslint": "^6.5.1",
     "eslint-config-google": "^0.14.0",
