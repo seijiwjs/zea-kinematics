@@ -19,7 +19,7 @@ const plugin = {
     return code
       .replace('@zeainc/zea-engine', '../../zea-engine/dist/index.esm.js')
       .replace('@zeainc/zea-ux', '../../zea-ux/dist/index.rawimport.js')
-  }
+  },
 }
 
 export default [
@@ -34,9 +34,9 @@ export default [
     external: [...Object.keys(pkg.dependencies)],
     plugins: [webWorkerLoader()],
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' },
-      { file: pkg.rawimport, format: 'es', plugins: [plugin] }
-    ]
-  }
+      { file: pkg.main, format: 'cjs', sourcemap: true },
+      { file: pkg.module, format: 'es', sourcemap: true },
+      { file: pkg.rawimport, format: 'es', plugins: [plugin], sourcemap: true },
+    ],
+  },
 ]
