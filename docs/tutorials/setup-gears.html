@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZEA CAD - Setup Gears</title>
+  <title>Zea Kinematics - Setup Gears</title>
   <style type="text/css">
     html, body {
       overflow: hidden;
@@ -18,19 +18,19 @@
   <div id="viewport"></div>
 </body>
 <script type="module">
-  import { Vec3, Xfo, Color, Material, GeomItem, Cylinder, GearsOperator, Scene, GLRenderer } from 'https://cdn.jsdelivr.net/npm/@zeainc/zea-engine/dist/index.esm.js'
-  import { CADAsset } from 'https://cdn.jsdelivr.net/npm/@zeainc/zea-cad/dist/index.rawimport.js'
+  import { Vec3, Xfo, Color, Material, TreeItem, GeomItem, Cylinder, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { GearsOperator } from '../libs/zea-kinematics/dist/index.rawimport.js'
 
   const domElement = document.getElementById("viewport")
 
   const scene = new Scene()
   scene.setupGrid(10.0, 10)
 
-  const asset = new CADAsset("gears")
-  scene.getRoot().addChild(asset)
+  const treeItem = new TreeItem("tree")
+  scene.getRoot().addChild(treeItem)
 
   const gearsOp = new GearsOperator("Gears")
-  asset.addChild(gearsOp)
+  treeItem.addChild(gearsOp)
 
   let index = 0
   let sign = 1
@@ -43,8 +43,8 @@
     const geomItem = new GeomItem('gear' + index++, gearGeom, gearMaterial)
     const xfo = new Xfo()
     xfo.tr = pos
-    geomItem.setLocalXfo(xfo)
-    asset.addChild(geomItem)
+    geomItem.getParameter('LocalXfo').setValue(xfo)
+    treeItem.addChild(geomItem)
 
     const ratio = (prevTeeth > 0 ? prevTeeth / teeth : 1.0) * sign
     console.log(index, ratio)
@@ -72,6 +72,6 @@
     .getCamera()
     .setPositionAndTarget(new Vec3(15, 15, 10), new Vec3(0, 0, 0))
   renderer.frameAll()
-  renderer.resumeDrawing()
+
 </script>
 </html>

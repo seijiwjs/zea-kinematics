@@ -35,7 +35,6 @@ class ExplodePartParameter extends StructParameter {
       new Vec2Parameter('MovementTiming', new Vec2(0, 1), [new Vec2(0, 0), new Vec2(1, 1)])
     )
     this.__multiplierParam = this._addMember(new NumberParameter('Multiplier', 1.0))
-    this.__output = new OperatorOutput('Part', OperatorOutputMode.OP_READ_WRITE)
   }
 
   /**
@@ -176,6 +175,7 @@ class ExplodePartsOperator extends Operator {
       } else {
         this.__stagesParam.setValue(1)
       }
+      event.elem.__output = new OperatorOutput('Part' + event.index, OperatorOutputMode.OP_READ_WRITE)
       this.addOutput(event.elem.getOutput())
       this.setDirty()
     })

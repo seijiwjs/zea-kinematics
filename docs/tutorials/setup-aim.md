@@ -1,16 +1,15 @@
 [//]: <> (Author: Philip Taylor)
 [//]: <> (Last Modified: June 12, 2020)
 
-# How-To Setup Gears
+# How-To Setup the Aim Operator
 When working with gears, making them spin gives life to your scene. By showing how each element in your machine interacts with others. The Zea Engine has a class specifically for gears, and contrary to what you could think, it is not hard to implement, let's see an example.
 <br>
 
-?> You can download the source code and the `.zcad` file using the "**Download**" button below the live example.
 
-[Labels](./setup-gears.html ':include :type=iframe width=100% height=800px')
+[Labels](./setup-aim.html ':include :type=iframe width=100% height=800px')
 
 <a class="download-btn" title="Click here to download the file to your computer to try it for yourself"
-  onClick="downloadTutorial('setup-gears.zip', ['/how-to/setup-gears.html', '/assets/Dead_eye_bearing.zcad'])" download>
+  onClick="downloadTutorial('setup-aim.zip', ['/how-to/setup-aim.html'])" download>
   Download
 </a>
 <br>

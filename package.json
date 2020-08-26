@@ -4,7 +4,7 @@
   "fileName": "zea-kinematics",
   "author": "Philip Taylor",
   "description": "kinematics Extension for Zea Engine.",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "license": "MIT",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -30,10 +30,12 @@
     "docs": "adg --config adg.config.json",
     "docs-w": "adg -w --config=adg.config.json",
     "prepare": "yarn build",
-    "start": "rollup -c rollup.config.dev.js -w"
+    "start": "rollup -c rollup.config.dev.js -w",
+    "to-cleanup": "rm -Rf dist/ node_modules/ yarn.lock"
   },
   "devDependencies": {
     "@zeainc/jsdocs2md": "^0.0.3",
+    "docsify-cli": "^4.4.1",
     "eslint": "^6.5.1",
     "eslint-config-google": "^0.14.0",
     "eslint-config-prettier": "^6.3.0",
@@ -47,6 +49,7 @@
   },
   "dependencies": {
     "@zeainc/zea-engine": "^1.0.4",
+    "@zeainc/zea-ux": "^1.4.0",
     "docsify": "^4.11.3"
   },
   "externals": {
