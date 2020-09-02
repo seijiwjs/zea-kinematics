@@ -12,3 +12,11 @@
 - Technical Overview
   * [Acknowledgements](acknowledgements.md)
 
+- API Reference
+[//]: <> (API)
+* [AimOperator](api/AimOperator)
+* [ExplodePartsOperator](api/ExplodePartsOperator)
+* [GearsOperator](api/GearsOperator)
+* [PistonOperator](api/PistonOperator)
+
+[//]: <> (API)
