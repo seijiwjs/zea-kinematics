@@ -49,7 +49,7 @@ gear.getOutput().setParam(group.getParameter('GlobalXfo'))
 
 And that's it! Not that complicated, eh?
 
-!>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea CAD](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation, you can use the CDNs (as we do in the example code).
+!>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea Kinematics](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation, you can use the CDNs (as we do in the example code).
 
 ```javascript
   import { Vec3, Xfo, Color, Material, TreeItem, GeomItem, Cylinder, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'

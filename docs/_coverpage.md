@@ -5,7 +5,7 @@
 
 # Zea Kinematics
 
-> Kinematics Plugin for Zea Engine
+> Kinematics Plug-in for Zea Engine
 
 
 <ul style="display:inline-block">

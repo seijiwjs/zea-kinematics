@@ -15,8 +15,15 @@
 - API Reference
 [//]: <> (API)
 * [AimOperator](api/AimOperator)
+* [AttachmentConstraint](api/AttachmentConstraint)
+* [CCDIKSolver](api/CCDIKSolver)
 * [ExplodePartsOperator](api/ExplodePartsOperator)
 * [GearsOperator](api/GearsOperator)
 * [PistonOperator](api/PistonOperator)
-
+* [RamAndPistonOperator](api/RamAndPistonOperator)
+* [TriangleIKSolver](api/TriangleIKSolver)
+* [Tracks](api/Tracks/README)
+  * [BaseTrack](api/Tracks/BaseTrack)
+  * [TrackSampler](api/Tracks/TrackSampler)
+  * [XfoTrackDisplay](api/Tracks/XfoTrackDisplay)
 [//]: <> (API)

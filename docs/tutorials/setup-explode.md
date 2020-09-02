@@ -56,7 +56,7 @@ asset.addChild(explodedAmount)
   explodedAmount.getParameter('Input').setValue(0)
 ```
 
-!>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea CAD](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation you can use the CDNs (as we do in the example code).
+!>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea Kinematics](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation you can use the CDNs (as we do in the example code).
 
 ```javascript
   import { MathFunctions, Vec3, Xfo, Color, Material, TreeItem, GeomItem, Cuboid, Cylinder, Sphere, Group, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
