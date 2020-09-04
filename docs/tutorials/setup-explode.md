@@ -6,12 +6,15 @@ Maybe one of the most amazing features in the engine, letting you split up all t
 
 ?> You can download the source code and the `.zcad` file using the "**Download**" button below the live example.
 
-[Labels](./setup-explode.html ':include :type=iframe width=100% height=800px')
-
-<a class="download-btn" title="Click here to download the file to your computer to try it for yourself"
-  onClick="downloadTutorial('setup-explode.zip', ['/how-to/setup-explode.html'])">
-  Download
-</a>
+<!-- Copy and Paste Me -->
+<div class="glitch-embed-wrap" style="height: 420px; width: 100%;">
+  <iframe
+    src="https://glitch.com/embed/#!/embed/explode-operator?path=package.json&previewSize=100"
+    title="explode-operator on Glitch"
+    allow="geolocation; microphone; camera; midi; vr; encrypted-media"
+    style="height: 100%; width: 100%; border: 0;">
+  </iframe>
+</div>
 <br>
 
 #### Source Code
@@ -201,14 +204,4 @@ asset.addChild(explodedAmount)
 ```
 
 ## API Class Reference
-- [Vec3](https://zeainc.github.io/zea-engine/#/api/Math/Vec3)
-- [Xfo](https://zeainc.github.io/zea-engine/#/api/Math/Xfo)
-- [Color](https://zeainc.github.io/zea-engine/#/api/Math/Color)
-- [Material](https://zeainc.github.io/zea-engine/#/api/SceneTree/Material)
-- [Group](https://zeainc.github.io/zea-engine/#/api/SceneTree/Group)
-- [Scene](https://zeainc.github.io/zea-engine/#/api/SceneTree/Scene)
-- [GLRenderer](https://zeainc.github.io/zea-engine/#/api/Renderer/GLRenderer)
-- [EulerAngles](#linkToAPI)
-- [ExplodePartsOperator](#linkToAPI)
-- [CADAsset](api/CADAsset)
-- [GLCADPass](api/GLCADPass)
+- [ExplodePartsOperator](api/ExplodePartsOperator)

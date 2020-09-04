@@ -7,12 +7,15 @@ When working with gears, making them spin gives life to your scene. By showing h
 
 ?> You can download the source code and the `.zcad` file using the "**Download**" button below the live example.
 
-[Labels](./setup-gears.html ':include :type=iframe width=100% height=800px')
-
-<a class="download-btn" title="Click here to download the file to your computer to try it for yourself"
-  onClick="downloadTutorial('setup-gears.zip', ['/how-to/setup-gears.html', '/assets/Dead_eye_bearing.zcad'])" download>
-  Download
-</a>
+<!-- Copy and Paste Me -->
+<div class="glitch-embed-wrap" style="height: 420px; width: 100%;">
+  <iframe
+    src="https://glitch.com/embed/#!/embed/gear-operator?path=src/main.js&previewSize=100"
+    title="gear-operator on Glitch"
+    allow="geolocation; microphone; camera; midi; vr; encrypted-media"
+    style="height: 100%; width: 100%; border: 0;">
+  </iframe>
+</div>
 <br>
 ___
 
@@ -109,14 +112,5 @@ And that's it! Not that complicated, eh?
 ```
 ___
 ## API Class References
-- [Scene](https://zeainc.github.io/zea-engine/#/api/SceneTree/Scene)
-- [GLRenderer](https://zeainc.github.io/zea-engine/#/api/Renderer/GLRenderer)
-- [Vec3](https://zeainc.github.io/zea-engine/#/api/Math/Vec3)
-- [Xfo](https://zeainc.github.io/zea-engine/#/api/Math/Xfo)
-- [Color](https://zeainc.github.io/zea-engine/#/api/Math/Color)
-- [Material](https://zeainc.github.io/zea-engine/#/api/SceneTree/Material)
-- [GeomItem](https://zeainc.github.io/zea-engine/#/api/SceneTree/GeomItem)
-- [Cylinder](https://zeainc.github.io/zea-engine/#/api/SceneTree/Geometry/Shapes/Cylinder)
-- [GearsOperator](https://zeainc.github.io/zea-engine/#/api/SceneTree/Operators/GearsOperator)
-- [CADAsset](api/CADAsset)
+- [GearsOperator](api/GearsOperator)
 
