@@ -7,6 +7,9 @@ mklink /J "../libs/zea-engine/public-resources" "../../node_modules/@zeainc/zea-
 mkdir "../libs/zea-kinematics"
 mklink /J "../libs/zea-kinematics/dist" "../../dist"
 
+mkdir "../libs/zea-ux"
+mklink /J "../libs/zea-ux/dist" "../../node_modules/@zeainc/zea-ux/dist"
+
 
 
 pause

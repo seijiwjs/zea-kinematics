@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZEA CAD - Setup Aim</title>
+  <title>Zea Kinematics - Setup Aim</title>
   <style type="text/css">
     html, body {
       overflow: hidden;
@@ -18,8 +18,8 @@
   <div id="viewport"></div>
 </body>
 <script type="module">
-  import { Vec3, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cone, Sphere, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
-  import { AimOperator } from '../libs/zea-kinematics/dist/index.rawimport.js'
+  import { Vec3, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { RamAndPistonOperator } from '../libs/zea-kinematics/dist/index.rawimport.js'
 
   const domElement = document.getElementById("viewport")
 
@@ -36,35 +36,38 @@
   const treeItem = new TreeItem("tree")
   scene.getRoot().addChild(treeItem)
   
-  const aimGeom = new Cone(0.2, 1.0, 30, true)
-  const aimGeomMaterial = new Material('aimGeommaterial', 'SimpleSurfaceShader')
-  aimGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
-  const aimGeomItem = new GeomItem('aim', aimGeom, aimGeomMaterial)
-  treeItem.addChild(aimGeomItem)
+  const ramGeomMaterial = new Material('ramGeommaterial', 'SimpleSurfaceShader')
+  ramGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
+  const ramGeomItem = new GeomItem('ram', new Cylinder(0.2, 1.0, 30, 2, true, true), ramGeomMaterial)
+  treeItem.addChild(ramGeomItem)
 
-  const targGeom = new Sphere(0.04, 30)
-  const targGeomMaterial = new Material('targGeommaterial', 'SimpleSurfaceShader')
-  targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
-  const targGeomItem = new GeomItem('aim', targGeom, targGeomMaterial)
+  const pistonGeomMaterial = new Material('pistonGeommaterial', 'SimpleSurfaceShader')
+  pistonGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  const pistonGeomItem = new GeomItem('ram', new Cylinder(0.1, 1.0, 30, 2, true, true), pistonGeomMaterial)
   const xfo = new Xfo()
   xfo.tr.set(-1, 1, 1)
-  targGeomItem.getParameter('LocalXfo').setValue(xfo)
-  treeItem.addChild(targGeomItem)
+  pistonGeomItem.getParameter('LocalXfo').setValue(xfo)
+  treeItem.addChild(pistonGeomItem)
 
-  const aimOp = new AimOperator("AimOp")
-  aimOp.getParameter('Axis').setValue(4)
-  // aimOp.getParameter('Stretch').setValue(true)
-  aimOp.getInput('Target').setParam(targGeomItem.getParameter('GlobalXfo'))
-  aimOp.getOutput('InputOutput').setParam(aimGeomItem.getParameter('GlobalXfo'))
-  treeItem.addChild(aimOp)
+  const ramPistonOp = new RamAndPistonOperator("AimOp")
+  ramPistonOp.getParameter('Axis').setValue(4)
+  ramPistonOp.getOutput('Ram').setParam(ramGeomItem.getParameter('GlobalXfo'))
+  ramPistonOp.getOutput('Piston').setParam(pistonGeomItem.getParameter('GlobalXfo'))
+  treeItem.addChild(ramPistonOp)
 
   // //////////////////////////////////////////////
-  // Make the target draggable.
-  targGeomItem.on('mouseEnter', (event) => {
-    targGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
+  // Make the parts draggable.
+  let prevColor = 
+  renderer.getViewport().on('mouseOverGeom', (event) => {
+    const geomItem = event.intersectionData.geomItem
+    const mat = geomItem.getParameter('Material').getValue()
+    prevColor = mat.getParameter('BaseColor').getValue()
+    mat.getParameter('BaseColor').setValue(new Color(1, 1, 1))
   })
-  targGeomItem.on('mouseLeave', (event) => {
-    targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  renderer.getViewport().on('mouseLeaveGeom', (event) => {
+    const geomItem = event.geomItem
+    const mat = geomItem.getParameter('Material').getValue()
+    mat.getParameter('BaseColor').setValue(prevColor)
   })
 
   let draggedGeom

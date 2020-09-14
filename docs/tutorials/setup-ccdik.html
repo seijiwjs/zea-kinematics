@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zea Kinematics - Setup CCDIK</title>
+  <style type="text/css">
+    html, body {
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport"></div>
+</body>
+<script type="module">
+  import { Vec3, Quat, Xfo, Ray, Color, Material, TreeItem, GeomItem, Cylinder, Cone, Sphere, Cuboid, Scene, GLRenderer } from '../libs/zea-engine/dist/index.esm.js'
+  import { IKSolver } from '../libs/zea-kinematics/dist/index.rawimport.js'
+
+  const domElement = document.getElementById("viewport")
+
+  const scene = new Scene()
+  const renderer = new GLRenderer(domElement)
+  renderer.setScene(scene)
+  renderer
+    .getViewport()
+    .getCamera()
+    .setPositionAndTarget(new Vec3(3, 3, 1), new Vec3(0, 0, 0))
+
+  scene.setupGrid(10.0, 10)
+
+  const treeItem = new TreeItem("tree")
+  scene.getRoot().addChild(treeItem)
+
+  const chainMaterial = new Material('chainMaterial', 'SimpleSurfaceShader')
+  chainMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
+
+  /////////////////////////////////////////
+  // Setup the base
+  // const baseGeom = new Cylinder(0.2, 0.2, 40, 2, true, true)
+  const baseGeom = new Cuboid(0.3, 0.1, 0.2, true)
+  const base = new GeomItem('base', baseGeom, chainMaterial)
+  base.length = 0.2
+  treeItem.addChild(base)
+  
+  /////////////////////////////////////////
+  // Setup the Target
+  const targGeom = new Cuboid(0.06, 0.06, 0.04)
+  const targGeomMaterial = new Material('targGeommaterial', 'SimpleSurfaceShader')
+  targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  const targGeomItem = new GeomItem('target', targGeom, targGeomMaterial)
+  const targXfo = new Xfo()
+  // targXfo.tr.set(-0.4, .5, .5)
+  targXfo.tr.set(-0.5, .3, 0.5)
+  targXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
+  targGeomItem.getParameter('LocalXfo').setValue(targXfo)
+  treeItem.addChild(targGeomItem)
+
+  // ///////////////////////////////////////
+  // Setup the Solver
+  const ikSolver = new IKSolver("ikSolver")
+  ikSolver.getInput('Target').setParam(targGeomItem.getParameter('GlobalXfo'))
+  ikSolver.addJoint(base.getParameter('GlobalXfo'), 2)
+  treeItem.addChild(ikSolver)
+
+  // ///////////////////////////////////////
+  // Setup Joint 0
+
+  function addJoint(name, prevJoint, ori, length, width, height, axis) {
+    const jointGeom = new Cuboid(width, height, length, true)
+    const joint = new GeomItem(name, jointGeom, chainMaterial)
+    const joint1xfo = new Xfo()
+    joint1xfo.tr.set(0, 0, prevJoint.length)
+    joint1xfo.ori = ori
+    joint.length = length
+    joint.getParameter('LocalXfo').setValue(joint1xfo)
+    prevJoint.addChild(joint, false)
+    
+    ikSolver.addJoint(joint.getParameter('GlobalXfo'), axis)
+    return joint
+  }
+  
+  const ori = new Quat()
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.5)
+  const joint0 = addJoint('joint0', base, ori, 0.6, 0.1, 0.05, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.5)
+  const joint1 = addJoint('joint1', joint0, ori, 0.1, 0.08, 0.03, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
+  const joint2 = addJoint('joint2', joint1, ori, 0.4, 0.06, 0.03, 2)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.5)
+  const joint3 = addJoint('joint3', joint2, ori, 0.08, 0.04, 0.03, 1)
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
+  const joint4 = addJoint('joint4', joint3, ori, 0.05, 0.03, 0.03, 2)
+  // const tip = addJoint('tip', joint4, 0.05, 0.03, 0.03, 2)
+  ikSolver.enable()
+
+  // ///////////////////////////////////////
+  // Make the target draggable.
+  targGeomItem.on('mouseEnter', (event) => {
+    targGeomMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
+  })
+  targGeomItem.on('mouseLeave', (event) => {
+    targGeomMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+  })
+
+  let draggedGeom
+  const geomRay = new Ray()
+  const mouseMove = (event) => {
+    event.stopPropagation()
+    
+    const xfo = draggedGeom.getParameter('GlobalXfo').getValue()
+    const dist = event.mouseRay.intersectRayPlane(geomRay)
+    xfo.tr = event.mouseRay.pointAtDist(dist)
+    draggedGeom.getParameter('GlobalXfo').setValue(xfo)
+  }
+  const mouseUp = (event) => {
+    event.stopPropagation()
+
+    renderer.getViewport().off('mouseMove', mouseMove)
+    renderer.getViewport().off('mouseUp', mouseUp)
+  }
+  renderer.getViewport().on('mouseDownOnGeom', (event) => {
+    event.stopPropagation()
+
+    draggedGeom = event.intersectionData.geomItem
+    
+    // geomRay.dir = event.viewport.getCamera().getParameter('GlobalXfo').getValue().ori.getZaxis().negate()
+    geomRay.dir = event.mouseRay.dir.negate()
+    geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
+
+    renderer.getViewport().on('mouseMove', mouseMove)
+    renderer.getViewport().on('mouseUp', mouseUp)
+  })
+ 
+</script>
+</html>
