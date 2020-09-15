@@ -73,11 +73,11 @@ const generateDebugLines = (debugTree, color) => {
 }
 
 class IKJoint {
-  constructor(index, axisId = 0, limits, backPropagationWeight, solverDebugTree) {
+  constructor(index, axisId = 0, limits, solverDebugTree) {
     this.index = index
     this.axisId = axisId
     this.limits = [MathFunctions.degToRad(limits[0]), MathFunctions.degToRad(limits[1])]
-    this.backPropagationWeight = backPropagationWeight
+    this.backPropagationWeight = 0.0
     this.align = new Quat()
 
     this.debugTree = new TreeItem('IKJoint' + index)
@@ -92,10 +92,12 @@ class IKJoint {
     this.debugLines[color].addDebugSegment(p0, p1)
   }
 
-  init(parentXfo) {
+  init(parentXfo, index, numJoints) {
     this.xfo = this.output.getValue().clone() // until we have an IO output
     this.localXfo = parentXfo.inverse().multiply(this.xfo)
     this.bindLocalXfo = this.localXfo.clone()
+
+    this.backPropagationWeight = index / (numJoints - 1)
 
     switch (this.axisId) {
       case 0:
@@ -240,9 +242,9 @@ class IKJoint {
         parentJoint.xfo.ori.normalizeInPlace()
       } else {
         // We propagate the alignment up the chain by rotating our parent.
-        const parentAlign = this.align.lerp(identityQuat, backPropagationWeight).conjugate()
+        const parentAlign = this.align.lerp(identityQuat, this.backPropagationWeight).conjugate()
         parentJoint.xfo.ori = parentAlign.multiply(parentJoint.xfo.ori)
-        this.xfo.ori = this.align.lerp(identityQuat, 1 - backPropagationWeight).multiply(this.xfo.ori)
+        this.xfo.ori = this.align.lerp(identityQuat, 1 - this.backPropagationWeight).multiply(this.xfo.ori)
       }
     } else {
       const globalAxis = this.xfo.ori.rotateVec3(this.axis)
@@ -337,8 +339,8 @@ class IKSolver extends Operator {
     this.debugTree = new TreeItem('IKSolver-debug')
   }
 
-  addJoint(globalXfoParam, axisId = 0, limits = [-180, 180], backPropagationWeight = 0) {
-    const joint = new IKJoint(this.joints.length, axisId, limits, backPropagationWeight, this.debugTree)
+  addJoint(globalXfoParam, axisId = 0, limits = [-180, 180]) {
+    const joint = new IKJoint(this.joints.length, axisId, limits, this.debugTree)
 
     const output = this.addOutput(new OperatorOutput('Joint' + this.joints.length))
     output.setParam(globalXfoParam)
@@ -352,7 +354,7 @@ class IKSolver extends Operator {
     const baseXfo = this.getInput('Base').isConnected() ? this.getInput('Base').getValue() : identityXfo
     this.joints.forEach((joint, index) => {
       const parentXfo = index > 0 ? this.joints[index - 1].xfo : baseXfo
-      joint.init(parentXfo)
+      joint.init(parentXfo, index, this.joints.length)
     })
     this.enabled = true
     this.setDirty()
