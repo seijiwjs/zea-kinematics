@@ -17,14 +17,21 @@ class TrackSampler extends Operator {
     this.track = track
     this.track.on('keyAdded', this.setDirty.bind(this))
     this.track.on('keyRemoved', this.setDirty.bind(this))
-    this.track.on('keyValueChanged', this.setDirty.bind(this))
+    this.track.on('keyChanged', this.setDirty.bind(this))
+
+    if (!this.track.getOwner()) this.track.setOwner(this)
 
     this.addInput(new OperatorInput('Time'))
     this.addOutput(new OperatorOutput('Output', OperatorOutputMode.OP_WRITE))
 
+    this.__initialValue = null
     this.__currChange = null
     this.__secondaryChange = null
     this.__secondaryChangeTime = -1
+
+    this.getOutput('Output').on('paramSet', () => {
+      this.__initialValue = this.getOutput('Output').getValue()
+    })
   }
 
   /**
@@ -43,12 +50,16 @@ class TrackSampler extends Operator {
         this.__secondaryChangeTime = time
 
         const keyAndLerp = this.track.findKeyAndLerp(time)
-        if (keyAndLerp.lerp > 0.0) {
+        if (
+          keyAndLerp.keyIndex == -1 ||
+          keyAndLerp.lerp > 0.0 ||
+          (keyAndLerp.keyIndex == this.track.getNumKeys() - 1 && this.track.getKeyTime(keyAndLerp.keyIndex) != time)
+        ) {
           this.__secondaryChange = new AddKeyChange(this.track, time, value)
-          this.__currChange.secondaryChanges.push(this.__secondaryChange)
+          this.__currChange.addSecondaryChange(this.__secondaryChange)
         } else {
           this.__secondaryChange = new KeyChange(this.track, keyAndLerp.keyIndex, value)
-          this.__currChange.secondaryChanges.push(this.__secondaryChange)
+          this.__currChange.addSecondaryChange(this.__secondaryChange)
         }
       } else {
         this.__secondaryChange.update(value)
@@ -62,11 +73,18 @@ class TrackSampler extends Operator {
    * The evaluate method.
    */
   evaluate() {
-    const time = this.getInput('Time').getValue()
     const output = this.getOutputByIndex(0)
+    if (this.track.getNumKeys() == 0) {
+      if (output.isConnected()) {
+        // output.setClean(this.__initialValue)
+        output.setClean(this.getOutput('Output').getValue())
+      }
+    } else {
+      const time = this.getInput('Time').getValue()
 
-    const xfo = this.track.evaluate(time)
-    output.setClean(xfo)
+      const xfo = this.track.evaluate(time)
+      output.setClean(xfo)
+    }
   }
 }
 

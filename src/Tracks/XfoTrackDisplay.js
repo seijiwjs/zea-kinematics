@@ -27,17 +27,16 @@ class KeyDisplayOperator extends Operator {
 
     this.track = track
     this.keyIndex = keyIndex
-    this.track.on('keyValueChanged', event => {
+    this.track.on('keyChanged', event => {
       if (event.index == this.keyIndex) this.setDirty()
     })
-    this.track.on('keysIndicesChanged', event => {
-      const { range, delta } = event
-      if (this.keyIndex > range[0] && this.keyIndex < range[1]) {
-        // this.keyIndex += delta
+    this.track.on('keyRemoved', event => {
+      const { index } = event
+      if (this.keyIndex >= index) {
         this.setDirty()
       }
     })
-    this.track.on('keyRemoved', event => {
+    this.track.on('keyAdded', event => {
       const { index } = event
       if (this.keyIndex >= index) {
         this.setDirty()
@@ -73,23 +72,21 @@ class XfoTrackDisplay extends GeomItem {
 
     this.getParameter('Geometry').setValue(new Lines())
 
-    const linesMat = new Material('trackLine', 'FlatSurfaceShader')
+    const linesMat = new Material('trackLine', 'LinesShader')
     linesMat.getParameter('BaseColor').setValue(new Color(0.3, 0.3, 0.3))
+    linesMat.getParameter('Overlay').setValue(0.5)
     this.getParameter('Material').setValue(linesMat)
 
     const dotsMat = new Material('trackDots', 'PointsShader')
     dotsMat.getParameter('BaseColor').setValue(new Color(0.75, 0.75, 0.75))
+    dotsMat.getParameter('Overlay').setValue(0.5)
     this.dotsItem = new GeomItem('dots', new Points(), dotsMat)
     this.addChild(this.dotsItem)
 
-    try {
-      this.__keyMat = new Material('trackLine', 'HandleShader')
-      this.__keyMat.getParameter('maintainScreenSize').setValue(1)
-      this.__keyCube = new Cuboid(0.004, 0.004, 0.004)
-    } catch (error) {
-      this.__keyMat = new Material('trackLine', 'SimpleSurfaceShader')
-      this.__keyCube = new Cuboid(0.01, 0.01, 0.01)
-    }
+    this.__keyMat = new Material('trackLine', 'HandleShader')
+    this.__keyMat.getParameter('MaintainScreenSize').setValue(1)
+    this.__keyMat.getParameter('Overlay').setValue(0.5)
+    this.__keyCube = new Cuboid(0.004, 0.004, 0.004)
 
     this.__keys = []
     this.__updatePath()
@@ -106,8 +103,12 @@ class XfoTrackDisplay extends GeomItem {
       this.__displayKeys()
       this.__updatePath()
     })
-    this.track.on('keyValueChanged', event => {
+    this.track.on('keyChanged', event => {
       this.__updatePath()
+    })
+    this.track.on('loaded', event => {
+      this.__updatePath()
+      this.__displayKeys()
     })
   }
 
@@ -133,16 +134,19 @@ class XfoTrackDisplay extends GeomItem {
     const trackDots = this.dotsItem.getParameter('Geometry').getValue()
 
     const timeRange = this.track.getTimeRange()
+    if (Number.isNaN(timeRange.x) || Number.isNaN(timeRange.y)) return
+
     const numSamples = Math.round((timeRange.y - timeRange.x) / 50) // Display at 50 samples per second
+    if (numSamples == 0) return
 
-    trackLines.setNumVertices(numSamples)
-    trackLines.setNumSegments(numSamples + 1)
+    trackLines.setNumVertices(numSamples + 1)
+    trackLines.setNumSegments(numSamples)
 
-    trackDots.setNumVertices(numSamples)
+    trackDots.setNumVertices(numSamples + 1)
     const linePositions = trackLines.getVertexAttribute('positions')
     const dotPositions = trackDots.getVertexAttribute('positions')
-    for (let i = 0; i < numSamples; i++) {
-      trackLines.setSegmentVertexIndices(i, i, i + 1)
+    for (let i = 0; i <= numSamples; i++) {
+      if (i < numSamples) trackLines.setSegmentVertexIndices(i, i, i + 1)
       const time = timeRange.x + (timeRange.y - timeRange.x) * (i / numSamples)
       const xfo = this.track.evaluate(time)
       linePositions.getValueRef(i).setFromOther(xfo.tr)
