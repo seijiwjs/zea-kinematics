@@ -29,6 +29,7 @@
     "docs": "adg --config adg.config.json",
     "docs-w": "adg -w --config=adg.config.json",
     "prepare": "yarn run build",
+    "release": "standard-version",
     "start": "es-dev-server",
     "start:watch": "es-dev-server --app-index testing-e2e/index.html --open --watch"
   },
@@ -44,6 +45,7 @@
     "rollup": "^2.2.0",
     "rollup-plugin-terser": "^5.3.0",
     "rollup-plugin-web-worker-loader": "^0.9.0",
+    "standard-version": "^9.0.0",
     "worker-loader": "^2.0.0",
     "yargs": "12.0.2"
   },
