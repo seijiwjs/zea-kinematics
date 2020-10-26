@@ -1,2 +1,3 @@
-# zea-kinematics
-Kinematic Operators for Zea Engine
+# Zea Kinematics
+
+Kinematic Operators for the Zea Engine.

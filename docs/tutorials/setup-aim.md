@@ -9,12 +9,13 @@ When working with gears, making them spin gives life to your scene. By showing h
 <!-- Copy and Paste Me -->
 <div class="glitch-embed-wrap" style="height: 420px; width: 100%;">
   <iframe
-    src="https://glitch.com/embed/#!/embed/aim-operator?path=package.json&previewSize=100"
+    src="https://glitch.com/embed/#!/embed/aim-operator?path=index.html&previewSize=100&attributionHidden=true"
     title="aim-operator on Glitch"
     allow="geolocation; microphone; camera; midi; vr; encrypted-media"
     style="height: 100%; width: 100%; border: 0;">
   </iframe>
 </div>
+
 <br>
 <br>
 ___
