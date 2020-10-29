@@ -7,7 +7,7 @@ import {
   Material,
   Operator,
   OperatorOutput,
-  OperatorOutputMode
+  OperatorOutputMode,
 } from '@zeainc/zea-engine'
 import { BaseTrack } from './BaseTrack'
 
@@ -27,16 +27,16 @@ class KeyDisplayOperator extends Operator {
 
     this.track = track
     this.keyIndex = keyIndex
-    this.track.on('keyChanged', event => {
+    this.track.on('keyChanged', (event) => {
       if (event.index == this.keyIndex) this.setDirty()
     })
-    this.track.on('keyRemoved', event => {
+    this.track.on('keyRemoved', (event) => {
       const { index } = event
       if (this.keyIndex >= index) {
         this.setDirty()
       }
     })
-    this.track.on('keyAdded', event => {
+    this.track.on('keyAdded', (event) => {
       const { index } = event
       if (this.keyIndex >= index) {
         this.setDirty()
@@ -89,31 +89,31 @@ class XfoTrackDisplay extends GeomItem {
     this.__keyCube = new Cuboid(0.004, 0.004, 0.004)
 
     this.__keys = []
-    this.__updatePath()
-    this.__displayKeys()
+    this.updatePath()
+    this.displayKeys()
 
-    this.track.on('keyAdded', event => {
-      this.__displayKeys()
-      this.__updatePath()
+    this.track.on('keyAdded', (event) => {
+      this.displayKeys()
+      this.updatePath()
     })
-    this.track.on('keyRemoved', event => {
+    this.track.on('keyRemoved', (event) => {
       const { index } = event
       const handle = this.__keys.pop()
       this.removeChild(this.getChildIndex(handle))
-      this.__displayKeys()
-      this.__updatePath()
+      this.displayKeys()
+      this.updatePath()
     })
-    this.track.on('keyChanged', event => {
-      this.__updatePath()
+    this.track.on('keyChanged', (event) => {
+      this.updatePath()
     })
-    this.track.on('loaded', event => {
-      this.__updatePath()
-      this.__displayKeys()
+    this.track.on('loaded', (event) => {
+      this.updatePath()
+      this.displayKeys()
     })
   }
 
-  __displayKeys() {
-    const displayKey = index => {
+  displayKeys() {
+    const displayKey = (index) => {
       if (!this.__keys[index]) {
         const handle = new GeomItem('key' + index, this.__keyCube, this.__keyMat)
         this.addChild(handle)
@@ -129,14 +129,14 @@ class XfoTrackDisplay extends GeomItem {
     }
   }
 
-  __updatePath() {
+  updatePath(timeRange) {
     const trackLines = this.getParameter('Geometry').getValue()
     const trackDots = this.dotsItem.getParameter('Geometry').getValue()
 
-    const timeRange = this.track.getTimeRange()
-    if (Number.isNaN(timeRange.x) || Number.isNaN(timeRange.y)) return
+    const trackTimeRange = this.track.getTimeRange()
+    if (Number.isNaN(trackTimeRange.x) || Number.isNaN(trackTimeRange.y)) return
 
-    const numSamples = Math.round((timeRange.y - timeRange.x) / 50) // Display at 50 samples per second
+    const numSamples = Math.round((trackTimeRange.y - trackTimeRange.x) / 50) // Display at 50 samples per second
     if (numSamples == 0) return
 
     trackLines.setNumVertices(numSamples + 1)
@@ -147,7 +147,7 @@ class XfoTrackDisplay extends GeomItem {
     const dotPositions = trackDots.getVertexAttribute('positions')
     for (let i = 0; i <= numSamples; i++) {
       if (i < numSamples) trackLines.setSegmentVertexIndices(i, i, i + 1)
-      const time = timeRange.x + (timeRange.y - timeRange.x) * (i / numSamples)
+      const time = trackTimeRange.x + (trackTimeRange.y - trackTimeRange.x) * (i / numSamples)
       const xfo = this.track.evaluate(time)
       linePositions.getValueRef(i).setFromOther(xfo.tr)
       dotPositions.getValueRef(i).setFromOther(xfo.tr)

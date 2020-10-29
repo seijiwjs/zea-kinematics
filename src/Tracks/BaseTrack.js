@@ -107,31 +107,31 @@ class BaseTrack extends EventEmitter {
     if (this.keys.length == 0) {
       return {
         keyIndex: -1,
-        lerp: 0
+        lerp: 0,
       }
     }
     if (time <= this.keys[0].time) {
       return {
         keyIndex: 0,
-        lerp: 0
+        lerp: 0,
       }
     }
     const numKeys = this.keys.length
     if (time >= this.keys[numKeys - 1].time) {
       return {
         keyIndex: numKeys - 1,
-        lerp: 0
+        lerp: 0,
       }
     }
-    // Find the first key after the specified time value
+    // Find the first key after the given time value
     for (let i = 1; i < numKeys; i++) {
       const key = this.keys[i]
-      if (key.time > time) {
+      if (time < key.time) {
         const prevKey = this.keys[i - 1]
         const delta = key.time - prevKey.time
         return {
           keyIndex: i - 1,
-          lerp: (time - prevKey.time) / delta
+          lerp: (time - prevKey.time) / delta,
         }
       }
     }
@@ -183,7 +183,7 @@ class BaseTrack extends EventEmitter {
     const j = {}
     j.name = this.name
     j.type = Registry.getBlueprintName(this)
-    j.keys = this.keys.map(key => {
+    j.keys = this.keys.map((key) => {
       return { time: key.time, value: key.value.toJSON ? key.value.toJSON() : key.value }
     })
     return j
@@ -197,14 +197,14 @@ class BaseTrack extends EventEmitter {
    */
   fromJSON(j, context) {
     this.__name = j.name
-    this.keys = j.keys.map(keyJson => this.loadKeyJSON(keyJson))
+    this.keys = j.keys.map((keyJson) => this.loadKeyJSON(keyJson))
     this.emit('loaded')
   }
 
   loadKeyJSON(json) {
     const key = {
       time: json.time,
-      value: json.value
+      value: json.value,
     }
     return key
   }
