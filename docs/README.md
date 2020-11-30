@@ -17,7 +17,7 @@ If you are primarily interested in working with CAD data, you can find informati
 
 ## Licensing
 
-The Zea Engine is distributed via NPM under a proprietary closed source license which gives developers the rights to evaluate Zea Engine and build non-commercial applications. By downloading the Zea Engine, your agree to be bound by the terms and conditions of this license available on the Zea Website: [zea.live](https://zea.live/)
+The Zea Engine is distributed via [npm](https://www.npmjs.com/) under a proprietary closed source license which gives developers the rights to evaluate Zea Engine and build non-commercial applications. By downloading the Zea Engine, your agree to be bound by the terms and conditions of this license available on the Zea Website: [zea.live](https://zea.live/)
 
 Zea Kinematics is distributed under the MID Open Source License.
 
