@@ -15,9 +15,9 @@ class TrackSampler extends Operator {
     super(name)
 
     this.track = track
-    this.track.on('keyAdded', this.setDirty.bind(this))
-    this.track.on('keyRemoved', this.setDirty.bind(this))
-    this.track.on('keyChanged', this.setDirty.bind(this))
+    this.track.on('keyAdded', this.setDirty)
+    this.track.on('keyRemoved', this.setDirty)
+    this.track.on('keyChanged', this.setDirty)
 
     if (!this.track.getOwner()) this.track.setOwner(this)
 
