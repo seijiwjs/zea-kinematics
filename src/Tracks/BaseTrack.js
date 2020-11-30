@@ -90,6 +90,11 @@ class BaseTrack extends EventEmitter {
     return index
   }
 
+  updateKey(index, value) {
+    this.keys[index].value = value
+    this.emit('keyUpdated', { index })
+  }
+
   removeKey(index) {
     // const undoRedoManager = UndoRedoManager.getInstance()
     // const change = undoRedoManager.getCurrentChange()
