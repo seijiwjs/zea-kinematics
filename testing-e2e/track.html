@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XfoTrack and TrackDisplay</title>
+
+  <style>
+    html, body, .container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+    }
+
+    #renderer {
+      height: inherit;
+    }
+
+    #footer {
+      display: flex;
+      height: 2.5em;
+      margin: auto 0.2em 0.2em 0.1em;
+    }
+
+    #footer #controls {
+      display: flex;
+      flex-direction: row;
+      margin-left: auto;
+      gap: 0.1em;
+      margin-left: 0.1em;
+    }
+
+    #footer #timeline {
+      flex: auto;
+      padding: 0 2px;
+      border: #545454 1px solid;
+    }
+
+    #footer #controls button {
+      width: 1.5em;
+      background-color: burlywood;
+      border: #545454 1px solid;
+      cursor: pointer;
+    }
+
+    #footer #timebar {
+      margin-top: 0.1em;
+      height: 2.2em;
+      width: 10px;
+      background-color: red;
+    }
+
+    .disable-select {
+      user-select: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <canvas id="renderer"></canvas>
+    <div id="footer">
+      <div id="timeline">
+        <div id="timebar"></div>
+      </div>
+      <div id="controls">
+        <button id="prevkey" class="disable-select">&lt;</button>
+        <button id="nextkey" class="disable-select">&gt;</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="../node_modules/@zeainc/zea-engine/dist/index.umd.js"></script>
+  <script src="../node_modules/@zeainc/zea-ux/dist/index.umd.js"></script>
+  <script src="../dist/index.umd.js"></script>
+
+  <script>
+    const { Vec3, Quat, Xfo, Color, Material, NumberParameter, TreeItem, GeomItem, Cuboid, Cone, Sphere, Scene, GLRenderer, Group } = window.zeaEngine
+    const { SelectionManager, ToolManager, ViewTool, HandleTool, SelectionTool } = window.zeaUx
+    const { ColorTrack, XfoTrack, TrackSampler, XfoTrackDisplay, RemoveKeyChange } = window.zeaKinematics
+
+    const domElement = document.getElementById('renderer')
+    const scene = new Scene()
+    const renderer = new GLRenderer(domElement, { hideSplash: true })
+
+    const treeItem = new TreeItem('TreeItem')
+    scene.getRoot().addChild(treeItem)
+
+    {
+      scene.setupGrid(10, 10)
+      const color = new Color('#E5E5E5')
+      scene.getSettings().getParameter('BackgroundColor').setValue(color)
+      renderer.setScene(scene)
+    }
+
+    const timeParam = new NumberParameter('time', 0)
+    treeItem.addParameter(timeParam)
+
+    const cubeMaterial = new Material('cubeMaterial', 'SimpleSurfaceShader')
+    cubeMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+    const cubeItem = new GeomItem('aim', new Cuboid(0.1, 0.2, 0.3), cubeMaterial)
+    treeItem.addChild(cubeItem)
+
+    const ori1 = new Quat()
+    ori1.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI)
+
+    const ori2 = new Quat()
+    ori2.setFromAxisAndAngle(new Vec3(0, 0, 1), Math.PI * 0.5)
+
+    const colorTrack = new ColorTrack("ColorTrack")
+    colorTrack.addKey(0, new Color())
+    colorTrack.addKey(1000, new Color(0, 0, 1))
+    colorTrack.addKey(2000, new Color(1, 0, 1))
+    colorTrack.addKey(3000, new Color(1, 1, 1))
+    colorTrack.addKey(4000, new Color(0, 1, 1))
+    colorTrack.addKey(5000, new Color(0, 0, 0))
+
+
+    const xfoTrack = new XfoTrack("XfoTrack")
+    xfoTrack.addKey(0, new Xfo())
+    xfoTrack.addKey(1000, new Xfo(new Vec3(0, 0, 1), ori1))
+    xfoTrack.addKey(2000, new Xfo(new Vec3(1, 0, 1), ori1))
+    xfoTrack.addKey(3000, new Xfo(new Vec3(1, 1, 1), ori2))
+    xfoTrack.addKey(4000, new Xfo(new Vec3(0, 1, 1), ori2))
+    xfoTrack.addKey(5000, new Xfo(new Vec3(0, 0, 0)))
+
+    const colorTrackSampler = new TrackSampler("colorTrack", colorTrack)
+    colorTrackSampler.getInput('Time').setParam(timeParam)
+    colorTrackSampler.getOutput('Output').setParam(cubeMaterial.getParameter('BaseColor'))
+
+    const xfoTrackSampler = new TrackSampler("XfoTrack", xfoTrack)
+    xfoTrackSampler.getInput('Time').setParam(timeParam)
+    xfoTrackSampler.getOutput('Output').setParam(cubeItem.getParameter('GlobalXfo'))
+
+    const TrackDisplay = new XfoTrackDisplay(xfoTrack)
+    treeItem.addChild(TrackDisplay)
+
+    ////////////////////////////////////////////////////
+    // Setup the tools.
+    const appData = {
+      scene,
+      renderer
+    }
+
+    const selectionManager = new SelectionManager(appData, {
+      enableXfoHandles: true,
+    })
+    
+    selectionManager.on('selectionChanged', (event) => {
+      event.selection.forEach((item) => console.log(item.getPath()))
+    })
+    
+    selectionManager.setSelection(new Set([cubeItem]), false)
+    ///////////////////////////////////////////////////
+    // Setup the time bar
+    const timeline = document.getElementById("timeline")
+    const timeBar = document.getElementById("timebar")
+    const prevKey = document.getElementById("prevkey")
+    const nextKey = document.getElementById("nextkey")
+
+    let playingId = false
+    const play = () => {
+      let time = Math.round(timeParam.getValue())
+      if (!playingId) {
+        playingId = setInterval(() => {
+          time += 20
+          timeParam.setValue(Math.round(time))
+          if (time > 5000) time = 0
+        }, 20)
+      }
+    }
+    const stop = () => {
+      clearInterval(playingId)
+      playingId = null
+    }
+    const setTime = (time) => {
+      timeParam.setValue(time)
+    }
+    play()
+
+    document.addEventListener('keydown', (event) => {
+      const key = String.fromCharCode(event.keyCode).toLowerCase()
+      switch (key) {
+        case ' ':
+          if (playingId) stop()
+          else play()
+          break
+        case 'w':
+          selectionManager.showHandles('Translate')
+          break
+        case 'e':
+          selectionManager.showHandles('Rotate')
+          break
+        case 'g':
+          selectionManager.setXfoMode(Group.INITIAL_XFO_MODES.globalOri)
+          break
+        case 'l':
+          selectionManager.setXfoMode(Group.INITIAL_XFO_MODES.average)
+          break
+
+
+        case '': {
+          const time = Math.round(timeParam.getValue())
+          const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+          if (keyAndLerp.lerp == 0.0) {
+            // xfoTrack.removeKey(keyAndLerp.keyIndex)
+            const removeKeyChange = new RemoveKeyChange(xfoTrack, keyAndLerp.keyIndex)
+            UndoRedoManager.getInstance().addChange(removeKeyChange)
+          }
+          break
+        }
+      }
+    })
+
+    timeline.addEventListener('mousedown', (event) => {
+      if (playingId) stop()
+      dragTimeBar(event)
+      document.addEventListener('mousemove', dragTimeBar)
+      document.addEventListener('mouseup', endDragTimeBar)
+    })
+    const dragTimeBar = (event) => {
+      const time = ((event.clientX - 5) / timeline.offsetWidth) * 5000
+      setTime(time)
+    }
+    const endDragTimeBar = (event) => {
+      document.removeEventListener('mousemove', dragTimeBar)
+      document.removeEventListener('mouseup', endDragTimeBar)
+    }
+
+    timeParam.on('valueChanged', () => {
+      const time = Math.round(timeParam.getValue())
+      const pixels = (time / 5000) * timeline.offsetWidth
+    
+      if (pixels > 0 && pixels < timeline.offsetWidth - 18) {
+        timeBar.style.marginLeft = `${(time / 5000) * timeline.offsetWidth}px` 
+      }
+    })
+
+    prevKey.addEventListener('mousedown', () => {
+      if (playingId) stop()
+      const time = Math.round(timeParam.getValue())
+      const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+      if (keyAndLerp.lerp > 0.0) {
+        const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex)
+        timeParam.setValue(time)
+      } else if (keyAndLerp.keyIndex > 0) {
+        const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex - 1)
+        timeParam.setValue(time)
+      } else {
+        const time = xfoTrack.getKeyTime(xfoTrack.getNumKeys() - 1)
+        timeParam.setValue(time)
+      }
+    })
+    nextKey.addEventListener('mousedown', () => {
+      if (playingId) stop()
+      const time = Math.round(timeParam.getValue())
+      const keyAndLerp = xfoTrack.findKeyAndLerp(time)
+      if (keyAndLerp.keyIndex < xfoTrack.getNumKeys() - 1) {
+        const time = xfoTrack.getKeyTime(keyAndLerp.keyIndex + 1)
+        timeParam.setValue(time)
+      } else {
+        const time = xfoTrack.getKeyTime(0)
+        timeParam.setValue(time)
+      }
+    })
+  </script>
+</body>
+</html>

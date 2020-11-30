@@ -25,6 +25,7 @@
 
     <script>
       const { GLRenderer, Scene, Color, TreeItem, Cuboid, GeomItem, Material, Xfo, Vec3, Quat, Ray } = window.zeaEngine
+      const { XfoHandle } = window.zeaUx
       const { IKSolver } = window.zeaKinematics
 
       const domElement = document.getElementById('renderer')
@@ -39,6 +40,10 @@
         const color = new Color('#E5E5E5')
         scene.getSettings().getParameter('BackgroundColor').setValue(color)
         renderer.setScene(scene)
+        renderer
+            .getViewport()
+            .getCamera()
+            .setPositionAndTarget(new Vec3(-3, 3, 1), new Vec3(0, 0, 0))
       }
 
       const targetMaterial = new Material('targetMaterial', 'SimpleSurfaceShader')
@@ -50,6 +55,7 @@
       chainMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
       const baseItem = new GeomItem('baseItem', new Cuboid(0.3, 0.3, 0.1, true), chainMaterial)
       baseItem.length = 0.1
+
       const targetItem = new GeomItem('targetItem', new Cuboid(0.05, 0.05, 0.2, true), targetMaterial)
       {
         treeItem.addChild(baseItem)
@@ -90,15 +96,15 @@
         const ori = new Quat()
         const joint0 = addJoint('joint0', baseItem, ori, 0.3, 0.2, 0.2, 2, [-40, 40])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.65)
-        const joint1 = addJoint('joint1', joint0, ori, 0.6, 0.15, 0.15, 1, [-140, 80])
-        ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2)
-        const joint2 = addJoint('joint2', joint1, ori, 0.15, 0.12, 0.12, 1)
+        const joint1 = addJoint('joint1', joint0, ori, 0.6, 0.15, 0.15, 1, [0, 80])
+        ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2,)
+        const joint2 = addJoint('joint2', joint1, ori, 0.15, 0.12, 0.12, 1, [0, 90])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
-        const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2)
+        const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2, [-90, 90])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.2)
-        const joint4 = addJoint('joint4', joint3, ori, 0.08, 0.11, 0.11, 1)
+        const joint4 = addJoint('joint4', joint3, ori, 0.08, 0.11, 0.11, 1, [-90, 90])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
-        const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2)
+        const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-90, 90])
       }
 
       ikSolver.enable()
