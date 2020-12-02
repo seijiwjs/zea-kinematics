@@ -153,7 +153,7 @@
     }
 
     const selectionManager = new SelectionManager(appData, {
-      enableXfoHandles: true,
+      enableXfoHandles: false,
     })
     
     selectionManager.on('selectionChanged', (event) => {
@@ -239,10 +239,11 @@
 
     timeParam.on('valueChanged', () => {
       const time = Math.round(timeParam.getValue())
-      const pixels = (time / 5000) * timeline.offsetWidth
+      let pixels = (time / 5000) * (timeline.offsetWidth - 6)
     
-      if (pixels > 0 && pixels < timeline.offsetWidth - 18) {
-        timeBar.style.marginLeft = `${(time / 5000) * timeline.offsetWidth}px` 
+      if (pixels >= 0 && pixels <= timeline.offsetWidth) {
+        if (pixels >= timeline.offsetWidth - 16) pixels = timeline.offsetWidth - 16
+        timeBar.style.marginLeft = `${pixels}px` 
       }
     })
 
