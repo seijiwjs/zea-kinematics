@@ -58,7 +58,7 @@
     "yargs": "12.0.2"
   },
   "dependencies": {
-    "@zeainc/zea-engine": "^2.0.0",
-    "@zeainc/zea-ux": "^2.0.0"
+    "@zeainc/zea-engine": "^3.0.0",
+    "@zeainc/zea-ux": "^3.0.0"
   }
 }

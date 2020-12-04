@@ -1509,17 +1509,20 @@
     meow "^7.0.1"
     rimraf "^3.0.2"
 
-"@zeainc/zea-engine@2.0.0", "@zeainc/zea-engine@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@zeainc/zea-engine/-/zea-engine-2.0.0.tgz#a25a9bf72aae92279afd17b25a596f92fbab5bc4"
-  integrity sha512-NpaNvQEiY+ASNo2wpR0BU5fIrXW61dNE5+hizzG5cJhH9V0DJIkiqCtMm0/wLlGBEc59nZ3WRca0wxPK1qAvpg==
-
-"@zeainc/zea-ux@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@zeainc/zea-ux/-/zea-ux-2.0.0.tgz#31c04fb624e31bd93f2bf578a34aae2e29b95a14"
-  integrity sha512-w+reY2O9p+CLquKOvnOlT5Sx0+RAu7m5jTqAjfVv9/qugwc6RI6L+GYMeyLPkzsjojHL5VDq5RNlgUd+nFHdIg==
+"@zeainc/zea-engine@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@zeainc/zea-engine/-/zea-engine-3.0.0.tgz#79797487cc3793cd5452c89cf4d22239a64c1c86"
+  integrity sha512-1Qe2i1vcpE4LholksgQPSOq8mHtyeNgNLNPSRgwtOhjCI9ns/xW+kD3hmhdkcQ/PuVIh718JcSJcq1n22R7iKQ==
   dependencies:
-    "@zeainc/zea-engine" "2.0.0"
+    debug "^4.1.1"
+    semver "^7.3.2"
+
+"@zeainc/zea-ux@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@zeainc/zea-ux/-/zea-ux-3.0.0.tgz#9809a51e1b4a5b481891e1a7f7b55c1a00cf2a5b"
+  integrity sha512-Tq3G1kgfEhwHpF8Rx6aFndIuhpfQGDU2rPZbNA5pjOgQYSlI5bSuLGdKaGUnkXeEsP+xoGFtT47AikKREOiGzg==
+  dependencies:
+    "@zeainc/zea-engine" "^3.0.0"
     dom-to-image "^2.6.0"
 
 JSONStream@^1.0.4:
