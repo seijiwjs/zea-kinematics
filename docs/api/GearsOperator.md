@@ -134,7 +134,6 @@ The reattach method.
 <a name="GearsOperator+destroy"></a>
 
 ### destroy
-The destroy is called by the system to cause explicit resources cleanup.
-Users should never need to call this method directly.
+The destroy is called by the system to cause explicit resources cleanup.Users should never need to call this method directly.
 
 
