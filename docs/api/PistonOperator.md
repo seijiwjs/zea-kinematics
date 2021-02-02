@@ -129,8 +129,7 @@ The fromJSON method decodes a json object for this type.
 <a name="PistonParameter+clone"></a>
 
 ### clone
-The clone method constructs a new piston parameter, copies its values
-from this parameter and returns it.
+The clone method constructs a new piston parameter, copies its valuesfrom this parameter and returns it.
 
 
 **Returns**: [<code>PistonParameter</code>](#PistonParameter) - - Returns a new cloned piston parameter.  
@@ -219,7 +218,6 @@ The fromJSON method decodes a json object for this type.
 <a name="PistonOperator+destroy"></a>
 
 ### destroy
-The destroy is called by the system to cause explicit resources cleanup.
-Users should never need to call this method directly.
+The destroy is called by the system to cause explicit resources cleanup.Users should never need to call this method directly.
 
 

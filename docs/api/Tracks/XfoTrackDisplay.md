@@ -29,7 +29,7 @@ Create a gears operator.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| track | <code>[BaseTrack](api/Tracks/BaseTrack.md)</code> | The track value. |
+| track | <code>[BaseTrack](api/Tracks\BaseTrack.md)</code> | The track value. |
 | keyIndex | <code>number</code> | The index of the key in the track |
 
 <a name="KeyDisplayOperator+evaluate"></a>
@@ -54,5 +54,5 @@ Create a TrackDisplay operator.
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | The name value. |
-| track | <code>[BaseTrack](api/Tracks/BaseTrack.md)</code> | The track to display. |
+| track | <code>[BaseTrack](api/Tracks\BaseTrack.md)</code> | The track to display. |
 

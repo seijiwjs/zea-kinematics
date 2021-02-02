@@ -1,9 +1,10 @@
-[//]: <> (Author: Michael Smith)
-[//]: <> (Date: May 22, 2020)
-
 ![logo](_media/logo-zea.svg)
 
 # Zea Kinematics
+
+[![NPM Package][npm]][npm-url]
+[![Build Size][build-size]][build-size-url]
+[![NPM Downloads][npm-downloads]][npmtrends-url]
 
 > Kinematics Plug-in for Zea Engine
 
@@ -39,3 +40,10 @@ Reach
 <!-- background color -->
 
 ![color](#333333)
+
+[npm]: https://badge.fury.io/js/%40zeainc%2Fzea-kinematics.svg
+[npm-url]: https://www.npmjs.com/package/@zeainc/zea-kinematics
+[build-size]: https://badgen.net/bundlephobia/minzip/@zeainc/zea-kinematics
+[build-size-url]: https://bundlephobia.com/result?p=@zeainc/zea-kinematics
+[npm-downloads]: https://img.shields.io/npm/dw/@zeainc/zea-kinematics
+[npmtrends-url]: https://www.npmtrends.com/@zeainc/zea-kinematics
