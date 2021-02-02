@@ -21,23 +21,6 @@ const Z_AXIS = new Vec3(0, 0, 1)
 const identityXfo = new Xfo()
 const identityQuat = new Quat()
 
-// http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
-function QuatfromTwoVectors(u, v) {
-  const d = u.dot(v)
-  if (Math.abs(-1 - d) < 0.0000001) {
-    return new Quat(0, 0, 0, -1)
-  }
-  const m = Math.sqrt(2 + 2 * d)
-  const w = u.cross(v)
-  w.scaleInPlace(1 / m)
-  const result = new Quat(w.x, w.y, w.z, 0.5 * m)
-
-  // let len = 1 / Math.sqrt(result.x * result.x + result.y * result.y + result.z * result.z + result.w * result.w)
-  // if (len != 1.0) console.log(len)
-  // result.normalizeInPlace()
-  return result
-}
-
 const generateDebugLines = (debugTree, color) => {
   const line = new Lines()
   const linepositions = line.getVertexAttribute('positions')
@@ -128,7 +111,6 @@ class IKJoint {
       // this.addDebugSegment('#FFFF00', this.xfo.tr, this.xfo.tr.add(parentGlobalAxis.scale(-0.2)))
 
       this.align.setFrom2Vectors(globalAxis, parentGlobalAxis)
-      // this.align = QuatfromTwoVectors(globalAxis, parentGlobalAxis)
       if (this.backPropagationWeight == 1.0) {
         parentJoint.xfo.ori = this.align.conjugate().multiply(parentJoint.xfo.ori)
         parentJoint.xfo.ori.normalizeInPlace()
@@ -142,7 +124,6 @@ class IKJoint {
       const globalAxis = this.xfo.ori.rotateVec3(this.axis)
       const parentGlobalAxis = (index > 0 ? joints[index - 1].xfo : baseXfo).ori.rotateVec3(this.axis)
       this.align.setFrom2Vectors(globalAxis, parentGlobalAxis)
-      // this.align = QuatfromTwoVectors(globalAxis, parentGlobalAxis)
       this.xfo.ori = this.align.multiply(this.xfo.ori)
     }
   }
@@ -157,7 +138,6 @@ class IKJoint {
       if (jointToTip.length() > 0.0001 && targetVec.length() > 0.0001) {
         jointToTip.normalizeInPlace()
         targetVec.normalizeInPlace()
-        // this.align = QuatfromTwoVectors(jointToTip, targetVec)
         this.align.setFrom2Vectors(jointToTip, targetVec)
         this.xfo.ori = this.align.multiply(this.xfo.ori)
         // this.addDebugSegment('#FF0000', this.xfo.tr, this.xfo.tr.add(jointToTip))
@@ -172,7 +152,6 @@ class IKJoint {
       const globalAxis = this.xfo.ori.rotateVec3(this.axis)
       const parentGlobalAxis = (index > 0 ? joints[index - 1].xfo : baseXfo).ori.rotateVec3(this.axis)
       this.align.setFrom2Vectors(globalAxis, parentGlobalAxis)
-      // this.align = QuatfromTwoVectors(globalAxis, parentGlobalAxis)
       this.xfo.ori = this.align.multiply(this.xfo.ori)
     }
 
