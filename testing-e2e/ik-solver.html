@@ -111,30 +111,23 @@
         }
 
         const ori = new Quat()
-        const joint0 = addJoint('joint0', baseItem, ori, 0.3, 0.2, 0.2, 2, [-40, 40])
+        const joint0 = addJoint('joint0', baseItem, ori, 0.3, 0.2, 0.2, 2, [-140, 140])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.65)
         const joint1 = addJoint('joint1', joint0, ori, 0.6, 0.15, 0.15, 1, [-60, 80])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2)
         const joint2 = addJoint('joint2', joint1, ori, 0.15, 0.12, 0.12, 1, [0, 150])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
-        const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2, [-90, 90])
+        const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2, [-100, 100])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.2)
         const joint4 = addJoint('joint4', joint3, ori, 0.08, 0.11, 0.11, 1, [-90, 90])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
-        const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-90, 90])
+        const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-140, 140])
       }
 
       ikSolver.enable()
 
       {
         // Make the target draggable.
-        targetItem.on('pointerEnter', (event) => {
-          targetMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
-        })
-        targetItem.on('pointerLeave', (event) => {
-          targetMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
-        })
-
         let draggedGeom
         let offset
         const geomRay = new Ray()
@@ -151,6 +144,7 @@
 
           renderer.getViewport().off('pointerMove', pointerMove)
           renderer.getViewport().off('pointerUp', pointerUp)
+          targetMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
         }
         renderer.getViewport().on('pointerDown', (event) => {
           if (event.intersectionData) {
@@ -161,6 +155,7 @@
             geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
             offset = geomRay.start.subtract(event.pointerRay.pointAtDist(event.intersectionData.dist))
 
+            targetMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
             renderer.getViewport().on('pointerMove', pointerMove)
             renderer.getViewport().on('pointerUp', pointerUp)
           }
