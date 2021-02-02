@@ -1,9 +1,7 @@
 
 # About the Zea Kinematics
 
-The Zea Engine is for innovative manufacturers and industry 4.0 supporters who need to build web applications.
-
-Zea Engine is a web-based 3D rendering solution designed from the ground up for CAD and professional graphics. Zea Engine provides the best in class power, speed, and reach for the next generation of web applications.
+This is a plug-in for [ZeaEngine](https://docs.zea.live/zea-engine) with features that enable the motion of points, bodies and system of bodies. In other words, animation of your objects inside the engine. Pistons, Explode Parts, Aiming, etc.
 
 ## Getting Started
 
