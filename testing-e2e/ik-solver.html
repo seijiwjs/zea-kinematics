@@ -24,7 +24,7 @@
   <body>
     <div id="controllers">
       <label for="show-xfo-handler">Show XfoHandler</label>
-      <input type="checkbox" name="show-xfo-handler" id="show-xfo-handler">
+      <input type="checkbox" name="show-xfo-handler" id="show-xfo-handler" />
     </div>
     <canvas id="renderer"></canvas>
 
@@ -49,10 +49,7 @@
         const color = new Color('#E5E5E5')
         scene.getSettings().getParameter('BackgroundColor').setValue(color)
         renderer.setScene(scene)
-        renderer
-            .getViewport()
-            .getCamera()
-            .setPositionAndTarget(new Vec3(-3, 3, 1), new Vec3(0, 0, 0))
+        renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(-3, 3, 1), new Vec3(0, 0, 0))
       }
 
       const targetMaterial = new Material('targetMaterial', 'SimpleSurfaceShader')
@@ -75,13 +72,11 @@
       {
         treeItem.addChild(baseItem)
 
-        
         targetXfo.tr.set(-1, 0, 0.5)
         targetXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
         targetItem.getParameter('LocalXfo').setValue(targetXfo)
         treeItem.addChild(targetItem)
 
-        
         xfoHandleXfo.tr.set(-1.1, 0, 0.5)
         xfoHandleXfo.sc.set(0.5, 0.5, 0.5)
         xfoHandle.getParameter('GlobalXfo').setValue(xfoHandleXfo)
@@ -119,7 +114,7 @@
         const joint0 = addJoint('joint0', baseItem, ori, 0.3, 0.2, 0.2, 2, [-40, 40])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.65)
         const joint1 = addJoint('joint1', joint0, ori, 0.6, 0.15, 0.15, 1, [-60, 80])
-        ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2,)
+        ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2)
         const joint2 = addJoint('joint2', joint1, ori, 0.15, 0.12, 0.12, 1, [0, 150])
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
         const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2, [-90, 90])
@@ -141,13 +136,14 @@
         })
 
         let draggedGeom
+        let offset
         const geomRay = new Ray()
         const pointerMove = (event) => {
           event.stopPropagation()
 
           const xfo = draggedGeom.getParameter('GlobalXfo').getValue()
           const dist = event.pointerRay.intersectRayPlane(geomRay)
-          xfo.tr = event.pointerRay.pointAtDist(dist)
+          xfo.tr = event.pointerRay.pointAtDist(dist).add(offset)
           draggedGeom.getParameter('GlobalXfo').setValue(xfo)
         }
         const pointerUp = (event) => {
@@ -156,20 +152,23 @@
           renderer.getViewport().off('pointerMove', pointerMove)
           renderer.getViewport().off('pointerUp', pointerUp)
         }
-        renderer.getViewport().on('pointerDownOnGeom', (event) => {
-          event.stopPropagation()
+        renderer.getViewport().on('pointerDown', (event) => {
+          if (event.intersectionData) {
+            event.stopPropagation()
 
-          draggedGeom = event.intersectionData.geomItem
-          geomRay.dir = event.pointerRay.dir.negate()
-          geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
+            draggedGeom = event.intersectionData.geomItem
+            geomRay.dir = event.pointerRay.dir.negate()
+            geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
+            offset = geomRay.start.subtract(event.pointerRay.pointAtDist(event.intersectionData.dist))
 
-          renderer.getViewport().on('pointerMove', pointerMove)
-          renderer.getViewport().on('pointerUp', pointerUp)
+            renderer.getViewport().on('pointerMove', pointerMove)
+            renderer.getViewport().on('pointerUp', pointerUp)
+          }
         })
 
         const cbxShowXfoHandler = document.getElementById('show-xfo-handler')
         cbxShowXfoHandler.addEventListener('change', (event) => {
-          (event.target.checked) ? xfoHandle.setVisible(true) : xfoHandle.setVisible(false)
+          event.target.checked ? xfoHandle.setVisible(true) : xfoHandle.setVisible(false)
         })
       }
     </script>
