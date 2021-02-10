@@ -6,26 +6,48 @@ We've hided pretty much all the complexity of the IK... and it works like an [`O
 
 ```javascript
 const { IKSolver } = window.zeaKinematics 
-// or
-// import { IKSolver } from '@zeainc/zea-kinematics'
 
-// Specify the base and the target(The one that is going to move the entire chain of joints).
-const baseItem = new GeomItem('baseItem', new Cuboid(0.3, 0.3, 0.1, true), material)
-const targetItem = new GeomItem('targetItem', new Cuboid(0.05, 0.05, 0.2, true), material)
 // Setup the Solver
 const ikSolver = new IKSolver('ikSolver')
 ikSolver.getInput('Base').setParam(baseItem.getParameter('GlobalXfo'))
 ikSolver.getInput('Target').setParam(targetItem.getParameter('GlobalXfo'))
-// then you can add as many joints as you want, with the axis it rotates
-// and the angle limits it can operate in.
-const joint = new GeomItem('Joint0', new Cuboid(0.3, 0.2, 0.2, true), jointMaterial)
-const jointXfo = new Xfo()
-jointXfo.tr.set(0, 0, 0.1)
-jointXfo.ori = ori.clone()
-joint.getParameter('LocalXfo').setValue(jointXfo)
-baseItem.addChild(joint, false)
+treeItem.addChild(ikSolver)
 
-ikSolver.addJoint(joint.getParameter('GlobalXfo'), 1, [-90, 90])
+{
+  // Setup Joint 0
+  let index = 0
+  const addJoint = (name, prevJoint, ori, length, width, height, axis, limits) => {
+    const jointMaterial = new Material('chainMaterial', 'SimpleSurfaceShader')
+    jointMaterial.getParameter('BaseColor').setValue(new Color(1 - index / 5, 1, 0))
+
+    const joint = new GeomItem(name, new Cuboid(width, height, length, true), jointMaterial)
+    const jointXfo = new Xfo()
+    jointXfo.tr.set(0, 0, prevJoint.length)
+    jointXfo.ori = ori.clone()
+    joint.length = length
+    joint.getParameter('LocalXfo').setValue(jointXfo)
+    prevJoint.addChild(joint, false)
+
+    ikSolver.addJoint(joint.getParameter('GlobalXfo'), axis, limits)
+    index++
+    return joint
+  }
+
+  const ori = new Quat()
+  const joint0 = addJoint('joint0', baseItem, ori, 0.3, 0.2, 0.2, 2, [-140, 140])
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -0.65)
+  const joint1 = addJoint('joint1', joint0, ori, 0.6, 0.15, 0.15, 1, [-60, 80])
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), -1.2)
+  const joint2 = addJoint('joint2', joint1, ori, 0.15, 0.12, 0.12, 1, [0, 150])
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0)
+  const joint3 = addJoint('joint3', joint2, ori, 0.3, 0.12, 0.12, 2, [-100, 100])
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.2)
+  const joint4 = addJoint('joint4', joint3, ori, 0.08, 0.11, 0.11, 1, [-90, 90])
+  ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
+  const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-140, 140])
+}
+
+ikSolver.enable()
 ```
 
 ## Demo
@@ -34,7 +56,7 @@ Checkout our demo code for further understanding.
 <!-- Copy and Paste Me -->
 <div class="glitch-embed-wrap" style="height: 420px; width: 100%;">
   <iframe
-    src="https://glitch.com/embed/#!/embed/zea-ik-solver-demo?path=index.html&previewSize=0"
+    src="https://glitch.com/embed/#!/embed/zea-ik-solver-demo?path=index.html&previewSize=100"
     title="zea-ik-solver-demo on Glitch"
     allow="geolocation; microphone; camera; midi; vr; encrypted-media"
     style="height: 100%; width: 100%; border: 0;">

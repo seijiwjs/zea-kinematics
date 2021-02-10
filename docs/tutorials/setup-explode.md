@@ -1,10 +1,8 @@
 [//]: <> (Author: Alvaro Pajaro)
 [//]: <> (Last Modified: June 9, 2020)
 
-# How-To Setup Exploded View
+# How-To Setup a part Explode
 Maybe one of the most amazing features in the engine, letting you split up all the parts of the model and show how they are assembled. Very useful in descriptive manuals.
-
-?> You can download the source code and the `.zcad` file using the "**Download**" button below the live example.
 
 <!-- Copy and Paste Me -->
 <div class="glitch-embed-wrap" style="height: 420px; width: 100%;">
@@ -22,41 +20,23 @@ Here is where things start to increase complexity, probably needing to test arou
 
 1. Create your `ExplodePartsOperator`(As many as you need), and add them to your asset right after creating it. Then you can start configuring its parameters.
 ``` javascript
-const opExplodeFront1 = new ExplodePartsOperator("opExplodeFront1")
-asset.addChild(opExplodeFront1)
-opExplodeFront1.getParameter('Dist').setValue(1.6)
-opExplodeFront1.getParameter('Stages').setValue(0)
-opExplodeFront1.getParameter('Cascade').setValue(true)
+  const opExplode = new ExplodePartsOperator("opExplode");
+  opExplode.getParameter("Dist").setValue(0.8);
+  opExplode.getParameter("Cascade").setValue(true);
 ```
 
-2. Create a `RouterOperator` object and add it to your asset
+2. For each element in the explode, you will need to call addElement, and assign it to control something. You can configure the direction that this item will move. In the example you can see that some parts move horizontally and others vertically
+> Note: if you would like a group of geometries to move as one, for example a collection of bolts, then you can add them to a group and then connect the group to the ExplodeOperator like we do in this example.
+
 ```javascript
-const explodedAmount = new RouterOperator('ExplodeAmount')
-explodedAmount.addRoute().setParam(opExplodeFront1.getParameter('Explode'))
-asset.addChild(explodedAmount)
+    const part = opExplode.getParameter("Parts").addElement();
+    part.getParameter("Axis").setValue(new Vec3(1, 0, 0));
+    part.getOutput().setParam(group.getParameter("GlobalXfo"));
 ```
 
-3. Group up the asset parts you want to move as one part and add it to the `ExplodePArtsOperator`.
+4. Finally, set the value for the `Explode` to cause the parts to move to their new locations.
 ```javascript
-  const group = new Group('bolts')
-  group.getParameter('InitialXfoMode').setValue('average')
-  asset.addChild(group)
-
-  group.resolveItems([
-    ['servomestre', 'Part1'],
-    ['servomestre', 'Symmetry of Part1'],
-    ['servomestre', 'Symmetry of Symmetry of Part1'],
-    ['servomestre', 'Symmetry of Part1_018', 'Symmetry of Part1'],
-  ])
-
-  const part = opExplodeFront1.getParameter('Parts').addElement()
-  part.getParameter('Axis').setValue(new Vec3(0, 0.02, 0))
-  part.getOutput().setParam(group.getParameter('GlobalXfo'))
-```
-
-4. Finally, set the value for the `Input parameter` in the `RouterOperator` object.
-```javascript
-  explodedAmount.getParameter('Input').setValue(0)
+  opExplode.getParameter("Explode").setValue(1)
 ```
 
 !>  [Zea Engine](https://github.com/ZeaInc/zea-engine) and [Zea Kinematics](https://github.com/ZeaInc/zea-cad) packages are the only two dependencies we have. For quicker implementation you can use the CDNs (as we do in the example code).
@@ -72,15 +52,9 @@ asset.addChild(explodedAmount)
   const renderer = new GLRenderer(domElement, { webglOptions: { antialias: false } })
   renderer.setScene(scene)
 
-  // const position = new Vec3({'x': 1.2,'y': 0.02,'z': 0.21})
-  // const target = new Vec3({ 'x': 0.0, 'y': 0.0, 'z': 0.15})
-  // renderer.getViewport().getCamera().setPositionAndTarget(position, target)
-
-
   const treeItem = new TreeItem("tree")
   scene.getRoot().addChild(treeItem)
   
-
   const opExplode = new ExplodePartsOperator("opExplode")
   opExplode.getParameter('Dist').setValue(0.8)
   opExplode.getParameter('Cascade').setValue(true)
