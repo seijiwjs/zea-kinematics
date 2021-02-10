@@ -4,7 +4,7 @@
   "fileName": "zea-kinematics",
   "author": "Philip Taylor",
   "description": "Kinematics extension for Zea Engine.",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "license": "MIT",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

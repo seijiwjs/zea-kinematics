@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/ZeaInc/zea-kinematics/compare/v3.1.0...v3.1.1) (2021-02-10)
+
+
+### Bug Fixes
+
+* TrackSampler generated exceptions when trying to interactively create keyframes. ([3bc7f39](https://github.com/ZeaInc/zea-kinematics/commit/3bc7f3901f4aada2f3822951099caea72b6744f6))
+
 ## [3.1.0](https://github.com/ZeaInc/zea-kinematics/compare/v3.0.1...v3.1.0) (2021-02-10)
 
 
