@@ -3,16 +3,12 @@
 
   * [Architecture Overview](arch-overview.md)
 
-
 - Plugins
   * [Setting up the Aim Operator](tutorials/setup-aim.md)
   * [Setting up an Explode Operator](tutorials/setup-explode.md)
   * [Setting up the Gears Operator](tutorials/setup-gears.md)
   * [Setting up the Ik Solver](tutorials/ik-solver.md)
   * [Setting up the Track](tutorials/track.md)
-
-- Technical Overview
-  * [Acknowledgements](acknowledgements.md)
 
 - API Reference
 [//]: <> (API)
