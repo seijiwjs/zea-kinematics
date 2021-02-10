@@ -45,11 +45,11 @@
       scene.getRoot().addChild(treeItem)
 
       {
-        scene.setupGrid(10, 10)
+        scene.setupGrid(10000, 10)
         const color = new Color('#E5E5E5')
         scene.getSettings().getParameter('BackgroundColor').setValue(color)
         renderer.setScene(scene)
-        renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(-3, 3, 1), new Vec3(0, 0, 0))
+        renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(-3000, 3000, 1000), new Vec3(0, 0, 0))
       }
 
       const targetMaterial = new Material('targetMaterial', 'SimpleSurfaceShader')
@@ -123,6 +123,10 @@
         ori.setFromAxisAndAngle(new Vec3(0, 1, 0), 0.0)
         const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-140, 140])
       }
+
+      const rootXfo = new Xfo()
+      rootXfo.sc.set(1000, 1000, 1000)
+      treeItem.getParameter('LocalXfo').setValue(rootXfo)
 
       ikSolver.enable()
 

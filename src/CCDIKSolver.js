@@ -178,7 +178,7 @@ class IKJoint {
       for (let i = index + 1; i < joints.length; i++) {
         const joint = joints[i]
         joint.xfo.ori = parentXfo.ori.multiply(joint.localXfo.ori)
-        joint.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(joint.localXfo.tr))
+        joint.xfo.tr = parentXfo.transformVec3(joint.localXfo.tr)
         parentXfo = joint.xfo
       }
     }
@@ -256,7 +256,7 @@ class IKSolver extends Operator {
           const joint = this.joints[i]
           joint.localXfo.ori = parentXfo.ori.inverse().multiply(joint.xfo.ori)
           joint.xfo.ori = parentXfo.ori.multiply(joint.localXfo.ori)
-          joint.xfo.tr = parentXfo.tr.add(parentXfo.ori.rotateVec3(joint.localXfo.tr))
+          joint.xfo.tr = parentXfo.transformVec3(joint.localXfo.tr)
           parentXfo = joint.xfo
         }
       }
