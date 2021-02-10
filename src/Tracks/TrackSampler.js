@@ -15,9 +15,12 @@ class TrackSampler extends Operator {
     super(name)
 
     this.track = track
-    this.track.on('keyAdded', this.setDirty)
-    this.track.on('keyRemoved', this.setDirty)
-    this.track.on('keyChanged', this.setDirty)
+    const setDirty = () => {
+      this.setDirty()
+    }
+    this.track.on('keyAdded', setDirty)
+    this.track.on('keyRemoved', setDirty)
+    this.track.on('keyChanged', setDirty)
 
     if (!this.track.getOwner()) this.track.setOwner(this)
 
@@ -44,7 +47,7 @@ class TrackSampler extends Operator {
 
     const undoRedoManager = UndoRedoManager.getInstance()
     const change = undoRedoManager.getCurrentChange()
-    if (change) {
+    if (change && change.addSecondaryChange) {
       if (this.__currChange != change || this.__secondaryChangeTime != time) {
         this.__currChange = change
         this.__secondaryChangeTime = time
@@ -63,6 +66,17 @@ class TrackSampler extends Operator {
         }
       } else {
         this.__secondaryChange.update(value)
+      }
+    } else {
+      const keyAndLerp = this.track.findKeyAndLerp(time)
+      if (
+        keyAndLerp.keyIndex == -1 ||
+        keyAndLerp.lerp > 0.0 ||
+        (keyAndLerp.keyIndex == this.track.getNumKeys() - 1 && this.track.getKeyTime(keyAndLerp.keyIndex) != time)
+      ) {
+        this.track.addKey(time, value)
+      } else {
+        this.track.setKeyValue(keyAndLerp.keyIndex, value)
       }
     }
 
