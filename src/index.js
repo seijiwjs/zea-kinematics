@@ -7,3 +7,5 @@ export * from './TriangleIKSolver.js'
 export * from './IKSolver.js'
 export * from './AttachmentConstraint.js'
 export * from './Tracks/index.js'
+
+export * from './KinematicJoint.js'
