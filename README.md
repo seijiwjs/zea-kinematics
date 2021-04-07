@@ -3,6 +3,7 @@
 [![NPM Package][npm]][npm-url]
 [![Build Size][build-size]][build-size-url]
 [![NPM Downloads][npm-downloads]][npmtrends-url]
+![Discourse topics](https://img.shields.io/discourse/topics?color=f9ce03&label=Community&logo=Zea&logoColor=2d2d2d&server=https%3A%2F%2Fcommunity.zea.live%2F)
 
 # Introduction
 This is a plug-in for [ZeaEngine](https://docs.zea.live/zea-engine) with features that enable the motion of points, bodies and system of bodies. In other words, animation of your objects inside the engine. Pistons, Explode Parts, Aiming, etc.
