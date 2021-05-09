@@ -6,7 +6,7 @@
 [![Build Size][build-size]][build-size-url]
 [![NPM Downloads][npm-downloads]][npmtrends-url]
 
-> Kinematics Plug-in for Zea Engine
+> Kinematics Plug-in for [Zea Engine](https://docs.zea.live/zea-engine/#/)
 
 
 <ul style="display:inline-block">
