@@ -15,7 +15,7 @@
 
 ![power](_media/icon-power.svg)
 
-Power
+Fast
 
 </li>
 
@@ -23,14 +23,14 @@ Power
 
 ![versatility](_media/icon-versatility.svg)
 
-Versatility
+Easy
 
 </li>
 <li style="display:inline-block; padding:20px;">
 
 ![reach](_media/icon-reach.svg)
 
-Reach
+Open
 
 </li>
 </ul>
