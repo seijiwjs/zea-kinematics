@@ -112,7 +112,7 @@
         Group,
       } = window.zeaEngine
       // const { SelectionManager, ToolManager, ViewTool, HandleTool, SelectionTool } = window.zeaUx
-      const { PrismaticJoint } = window.zeaKinematics
+      const { PrismaticJoint, RevoluteJoint } = window.zeaKinematics
 
       const scene = new Scene()
       scene.setupGrid(10, 10)
@@ -120,25 +120,34 @@
       renderer.setScene(scene)
       renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(2, 2, 1), new Vec3(0, 0, 0.25))
 
+      const assembly = new TreeItem('assembly')
       const timeParam = new NumberParameter('time', 0)
-      // treeItem.addParameter(timeParam)
+      assembly.addParameter(timeParam)
 
       const cubeMaterial = new Material('cubeMaterial', 'SimpleSurfaceShader')
       cubeMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
 
-      const cubeItem1 = new GeomItem('cubeItem1', new Cuboid(0.1, 0.2, 0.3), cubeMaterial)
+      const cubeItem1 = new GeomItem('cubeItem1', new Cuboid(0.05, 0.02, 0.3), cubeMaterial)
       cubeItem1.getParameter('GlobalXfo').setValue(new Xfo(new Vec3(0, 0, 0.5)))
-      scene.getRoot().addChild(cubeItem1)
+      assembly.addChild(cubeItem1)
+
       const cubeItem2 = new GeomItem('cubeItem2', new Cuboid(0.1, 0.2, 0.3), cubeMaterial)
       cubeItem2.getParameter('GlobalXfo').setValue(new Xfo(new Vec3(0, 0, 0.85)))
-      scene.getRoot().addChild(cubeItem2)
+      assembly.addChild(cubeItem2)
 
       const joint = new PrismaticJoint('Joint')
-      // joint.simulate(30)
       joint.getInput('Time').setParam(timeParam)
       joint.getInput('Base').setParam(cubeItem1.getParameter('GlobalXfo'))
       joint.getOutput('Target').setParam(cubeItem2.getParameter('GlobalXfo'))
-      // scene.getRoot().addChild(treeItem)
+      assembly.addChild(joint)
+
+      // const joint = new RevoluteJoint('Joint')
+      // joint.getInput('Time').setParam(timeParam)
+      // joint.getInput('Base').setParam(cubeItem1.getParameter('GlobalXfo'))
+      // joint.getOutput('Target').setParam(cubeItem2.getParameter('GlobalXfo'))
+      // assembly.addChild(joint)
+
+      scene.getRoot().addChild(assembly)
 
       ///////////////////////////////////////////////////
       // Setup the time bar

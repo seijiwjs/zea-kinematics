@@ -5,6 +5,7 @@ import {
   OperatorOutput,
   OperatorOutputMode,
   Registry,
+  Vec3,
   Xfo,
 } from '@zeainc/zea-engine'
 
@@ -26,6 +27,20 @@ class KinematicPair extends Operator {
     this.addParameter(new NumberParameter('Max', 0.5))
     this.addParameter(new NumberParameter('Accel', 1))
     this.addParameter(new NumberParameter('Decel', 1))
+
+    this.profiles = {
+      slow: { rate: 0.5 },
+      fast: { rate: 0.9 },
+    }
+
+    this.program = [
+      { command: 'wait', value: 1 },
+      { command: 'moveto', value: 2, profile: 'slow' },
+      { command: 'wait', value: 1 },
+      { command: 'moveto', value: 0.5, profile: 'fast' },
+    ]
+
+    this.simulation = [{ command: 'wait', time: 0 }]
   }
 
   simulate(delta) {
@@ -75,4 +90,40 @@ class PrismaticJoint extends KinematicPair {
 
 Registry.register('PrismaticJoint', PrismaticJoint)
 
-export { PrismaticJoint }
+/** An operator for aiming items at targets.
+ * @extends Operator
+ */
+class RevoluteJoint extends KinematicPair {
+  /**
+   * Create a gears operator.
+   * @param {string} name - The name value.
+   */
+  constructor(name) {
+    super(name)
+    // this.addParameter(new NumberParameter('Time', 0))
+
+    this.addParameter(new NumberParameter('Angle', Math.PI * 0.5))
+  }
+
+  /**
+   * The evaluate method.
+   */
+  evaluate() {
+    const time = this.getInput('Time').getValue() / 1000
+    const base = this.getInput('Base').getValue()
+
+    const Angle = this.getParameter('Angle').getValue()
+    const maxRate = this.getParameter('Max').getValue()
+    const accelRate = this.getParameter('Accel').getValue()
+    const decelRate = this.getParameter('Decel').getValue()
+
+    const d = calculateDelta(time, Angle, maxRate, accelRate, decelRate)
+    const result = new Xfo()
+    result.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), d)
+    this.getOutput('Target').setClean(base.multiply(result))
+  }
+}
+
+Registry.register('RevoluteJoint', RevoluteJoint)
+
+export { PrismaticJoint, RevoluteJoint }
