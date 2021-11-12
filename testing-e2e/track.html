@@ -21,8 +21,8 @@
         gap: 0.2em;
       }
 
-      #renderer {
-        height: inherit;
+      #canvasHolder {
+        height: 100%;
       }
 
       #footer {
@@ -83,7 +83,9 @@
           <input type="checkbox" id="xfoTool" value="XfoManipulator" class="tool" />
         </div>
       </div>
-      <canvas id="renderer"></canvas>
+      <div id="canvasHolder">
+        <canvas id="renderer"></canvas>
+      </div>
       <div id="footer">
         <div id="timeline">
           <div id="timebar"></div>
@@ -129,7 +131,7 @@
       {
         scene.setupGrid(10, 10)
         const color = new Color('#E5E5E5')
-        scene.getSettings().getParameter('BackgroundColor').setValue(color)
+        renderer.getViewport().backgroundColorParam.value = color
         renderer.setScene(scene)
       }
 

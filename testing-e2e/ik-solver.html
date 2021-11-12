@@ -8,6 +8,12 @@
     <style>
       html,
       body,
+      #rendererHolder {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
       #renderer {
         width: 100%;
         height: 100%;
@@ -26,7 +32,9 @@
       <label for="show-xfo-handler">Show XfoHandler</label>
       <input type="checkbox" name="show-xfo-handler" id="show-xfo-handler" />
     </div>
-    <canvas id="renderer"></canvas>
+    <div id="rendererHolder">
+      <canvas id="renderer"></canvas>
+    </div>
 
     <script src="../node_modules/@zeainc/zea-engine/dist/index.umd.js"></script>
     <script src="../node_modules/@zeainc/zea-ux/dist/index.umd.js"></script>
@@ -47,7 +55,7 @@
       {
         scene.setupGrid(10000, 10)
         const color = new Color('#E5E5E5')
-        scene.getSettings().getParameter('BackgroundColor').setValue(color)
+        renderer.getViewport().backgroundColorParam.value = color
         renderer.setScene(scene)
         renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(-3000, 3000, 1000), new Vec3(0, 0, 0))
       }
@@ -88,7 +96,7 @@
       const ikSolver = new IKSolver('ikSolver')
       ikSolver.getInput('Base').setParam(baseItem.getParameter('GlobalXfo'))
       ikSolver.getInput('Target').setParam(targetItem.getParameter('GlobalXfo'))
-      treeItem.addChild(ikSolver)
+      // treeItem.addChild(ikSolver)
 
       {
         // Setup Joint 0
