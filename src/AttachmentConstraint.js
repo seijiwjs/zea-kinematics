@@ -11,6 +11,8 @@ class AttachmentConstraint extends Operator {
   constructor(name) {
     super(name)
 
+    console.log('AttachmentConstraint')
+
     this.addInput(new OperatorInput('Time'))
     this.addOutput(new OperatorOutput('Attached', OperatorOutputMode.OP_READ_WRITE))
 
@@ -25,7 +27,7 @@ class AttachmentConstraint extends Operator {
     this.__attachTargets.push({
       input,
       time,
-      offsetXfo: undefined
+      offsetXfo: undefined,
     })
   }
 
