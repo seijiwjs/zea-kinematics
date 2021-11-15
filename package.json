@@ -32,8 +32,8 @@
     "generate": "plop",
     "prepare": "yarn run build",
     "release": "standard-version",
-    "start": "es-dev-server",
-    "start:watch": "es-dev-server --app-index testing-e2e/index.html --open --watch",
+    "start": "es-dev-server --cors",
+    "start:watch": "es-dev-server --app-index testing-e2e/index.html --cors --open --watch",
     "test:e2e": "percy exec cypress run --browser chrome --headless",
     "test:e2e:watch": "percy exec cypress open"
   },
@@ -58,6 +58,7 @@
     "yargs": "12.0.2"
   },
   "dependencies": {
+    "@rollup/plugin-json": "^4.1.0",
     "@zeainc/zea-engine": "^4",
     "@zeainc/zea-ux": "^4"
   }
