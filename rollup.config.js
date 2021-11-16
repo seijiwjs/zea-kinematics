@@ -42,10 +42,7 @@ export default [
   {
     input: 'src/index.js',
     external,
-    output: [
-      { file: pkg.main, format: 'cjs', sourcemap },
-      { file: pkg.module, format: 'es', sourcemap },
-    ],
+    output: [{ file: pkg.module, format: 'es', sourcemap }],
     plugins,
   },
 ]
