@@ -10,7 +10,7 @@ import {
   Operator,
   OperatorOutput,
   OperatorOutputMode,
-  Registry
+  Registry,
 } from '@zeainc/zea-engine'
 
 /** Class representing a gear parameter.
@@ -24,9 +24,9 @@ class GearParameter extends StructParameter {
   constructor(name) {
     super(name)
 
-    this.__ratioParam = this._addMember(new NumberParameter('Ratio', 1.0))
-    this.__offsetParam = this._addMember(new NumberParameter('Offset', 0.0))
-    this.__axisParam = this._addMember(new Vec3Parameter('Axis', new Vec3(1, 0, 0)))
+    this.__ratioParam = this.addMember(new NumberParameter('Ratio', 1.0))
+    this.__offsetParam = this.addMember(new NumberParameter('Offset', 0.0))
+    this.__axisParam = this.addMember(new Vec3Parameter('Axis', new Vec3(1, 0, 0)))
   }
 
   /**
@@ -124,15 +124,21 @@ class GearsOperator extends Operator {
       }
     })
     this.__gearsParam = this.addParameter(new ListParameter('Gears', GearParameter))
-    this.__gearsParam.on('elementAdded', event => {
+    this.__gearsParam.on('elementAdded', (event) => {
       event.elem.__output = new OperatorOutput('Gear' + event.index, OperatorOutputMode.OP_READ_WRITE)
       this.addOutput(event.elem.getOutput())
     })
-    this.__gearsParam.on('elementRemoved', event => {
+    this.__gearsParam.on('elementRemoved', (event) => {
       this.removeOutput(event.index)
     })
 
     this.__gears = []
+  }
+
+  addGear() {
+    const part = new GearParameter()
+    this.__gearsParam.addElement(part)
+    return part
   }
 
   /**

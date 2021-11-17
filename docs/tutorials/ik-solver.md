@@ -7,11 +7,57 @@ We've hided pretty much all the complexity of the IK... and it works like an [`O
 ```javascript
 const { IKSolver } = window.zeaKinematics 
 
+const scene = new Scene()
+const renderer = new GLRenderer(domElement, { hideSplash: true })
+
+const treeItem = new TreeItem('TreeItem')
+scene.getRoot().addChild(treeItem)
+
+{
+  scene.setupGrid(10000, 10)
+  const color = new Color('#E5E5E5')
+  renderer.getViewport().backgroundColorParam.value = color
+  renderer.setScene(scene)
+  renderer.getViewport().getCamera().setPositionAndTarget(new Vec3(-3000, 3000, 1000), new Vec3(0, 0, 0))
+}
+
+const targetMaterial = new Material('targetMaterial', 'SimpleSurfaceShader')
+{
+  targetMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
+}
+
+const chainMaterial = new Material('chainMaterial', 'SimpleSurfaceShader')
+chainMaterial.getParameter('BaseColor').setValue(new Color(0, 1, 0))
+const baseItem = new GeomItem('baseItem', new Cuboid(0.3, 0.3, 0.1, true), chainMaterial)
+baseItem.length = 0.1
+
+const targetItem = new GeomItem('targetItem', new Cuboid(0.05, 0.05, 0.2, true), targetMaterial)
+const targetXfo = new Xfo()
+const xfoHandleXfo = targetXfo.clone()
+
+const xfoHandle = new XfoHandle()
+xfoHandle.setVisible(false)
+xfoHandle.getParameter('HighlightColor').setValue(new Color(1, 1, 0))
+{
+  treeItem.addChild(baseItem)
+
+  targetXfo.tr.set(-1, 0, 0.5)
+  targetXfo.ori.setFromAxisAndAngle(new Vec3(0, 1, 0), Math.PI * -0.5)
+  targetItem.getParameter('LocalXfo').setValue(targetXfo)
+  treeItem.addChild(targetItem)
+
+  xfoHandleXfo.tr.set(-1.1, 0, 0.5)
+  xfoHandleXfo.sc.set(0.5, 0.5, 0.5)
+  xfoHandle.getParameter('GlobalXfo').setValue(xfoHandleXfo)
+  targetItem.addChild(xfoHandle)
+  xfoHandle.setTargetParam(targetItem.getParameter('GlobalXfo'))
+}
+
 // Setup the Solver
 const ikSolver = new IKSolver('ikSolver')
 ikSolver.getInput('Base').setParam(baseItem.getParameter('GlobalXfo'))
 ikSolver.getInput('Target').setParam(targetItem.getParameter('GlobalXfo'))
-treeItem.addChild(ikSolver)
+// treeItem.addChild(ikSolver)
 
 {
   // Setup Joint 0
@@ -47,7 +93,52 @@ treeItem.addChild(ikSolver)
   const joint5 = addJoint('joint5', joint4, ori, 0.05, 0.1, 0.1, 2, [-140, 140])
 }
 
+const rootXfo = new Xfo()
+rootXfo.sc.set(1000, 1000, 1000)
+treeItem.getParameter('LocalXfo').setValue(rootXfo)
+
 ikSolver.enable()
+
+{
+  // Make the target draggable.
+  let draggedGeom
+  let offset
+  const geomRay = new Ray()
+  const pointerMove = (event) => {
+    event.stopPropagation()
+
+    const xfo = draggedGeom.getParameter('GlobalXfo').getValue()
+    const dist = event.pointerRay.intersectRayPlane(geomRay)
+    xfo.tr = event.pointerRay.pointAtDist(dist).add(offset)
+    draggedGeom.getParameter('GlobalXfo').setValue(xfo)
+  }
+  const pointerUp = (event) => {
+    event.stopPropagation()
+
+    renderer.getViewport().off('pointerMove', pointerMove)
+    renderer.getViewport().off('pointerUp', pointerUp)
+    targetMaterial.getParameter('BaseColor').setValue(new Color(1, 0, 0))
+  }
+  renderer.getViewport().on('pointerDown', (event) => {
+    if (event.intersectionData) {
+      event.stopPropagation()
+
+      draggedGeom = event.intersectionData.geomItem
+      geomRay.dir = event.pointerRay.dir.negate()
+      geomRay.start = draggedGeom.getParameter('GlobalXfo').getValue().tr
+      offset = geomRay.start.subtract(event.pointerRay.pointAtDist(event.intersectionData.dist))
+
+      targetMaterial.getParameter('BaseColor').setValue(new Color(1, 1, 1))
+      renderer.getViewport().on('pointerMove', pointerMove)
+      renderer.getViewport().on('pointerUp', pointerUp)
+    }
+  })
+
+  const cbxShowXfoHandler = document.getElementById('show-xfo-handler')
+  cbxShowXfoHandler.addEventListener('change', (event) => {
+    event.target.checked ? xfoHandle.setVisible(true) : xfoHandle.setVisible(false)
+  })
+}
 ```
 
 ## Demo
