@@ -22,7 +22,7 @@ export default [
     external,
     output: {
       name: 'zeaKinematics',
-      file: pkg.browser,
+      file: pkg.umd,
       format: 'umd',
       sourcemap,
       globals: {
